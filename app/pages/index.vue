@@ -44,8 +44,21 @@ watch([search, genre, page], () => {
 
 const { data: genres } = useGenresQuery(() => locale.value)
 
+// Reka UI's Select reserves the empty string for the cleared/placeholder
+// state, so the "all genres" item needs a non-empty sentinel value. `genre`
+// stays the source of truth ('' = no filter) for the query/URL logic below;
+// this proxy maps the sentinel <-> '' only at the Select boundary.
+const ALL_GENRES = '__all__'
+
+const genreSelection = computed({
+  get: () => genre.value || ALL_GENRES,
+  set: (value: string) => {
+    genre.value = value === ALL_GENRES ? '' : value
+  }
+})
+
 const genreItems = computed(() => [
-  { label: t('catalogue.allGenres'), value: '' },
+  { label: t('catalogue.allGenres'), value: ALL_GENRES },
   ...(genres.value ?? []).map(g => ({ label: g, value: g }))
 ])
 
@@ -90,7 +103,7 @@ useSeoMeta({
           class="sm:max-w-xs"
         />
         <USelect
-          v-model="genre"
+          v-model="genreSelection"
           :items="genreItems"
           value-key="value"
           :aria-label="t('catalogue.genreLabel')"
