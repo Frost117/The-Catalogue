@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "Chương trình TV",
+    "tagline": "Duyệt các chương trình TV bằng ngôn ngữ của bạn"
+  },
+  "nav": {
+    "catalogue": "Danh mục",
+    "home": "Trang chủ"
+  },
+  "locale": {
+    "label": "Ngôn ngữ",
+    "en": "English",
+    "da": "Dansk",
+    "vi": "Tiếng Việt"
+  },
+  "catalogue": {
+    "title": "Chương trình TV",
+    "searchPlaceholder": "Tìm kiếm chương trình…",
+    "genreLabel": "Thể loại",
+    "allGenres": "Tất cả thể loại",
+    "resultsCount": "{count} chương trình",
+    "noResults": "Không có chương trình nào phù hợp với tìm kiếm của bạn.",
+    "clearFilters": "Xóa bộ lọc"
+  },
+  "show": {
+    "rating": "Đánh giá",
+    "genres": "Thể loại",
+    "summary": "Tóm tắt",
+    "cast": "Diễn viên",
+    "episodes": "Tập phim",
+    "season": "Phần {number}",
+    "episode": "Tập {number}",
+    "noSummary": "Không có tóm tắt.",
+    "noCast": "Không có thông tin diễn viên.",
+    "noEpisodes": "Không có tập phim.",
+    "back": "Quay lại danh mục",
+    "notFound": "Không tìm thấy chương trình",
+    "notFoundDescription": "Chúng tôi không tìm thấy chương trình bạn đang tìm."
+  },
+  "common": {
+    "loading": "Đang tải…",
+    "error": "Đã xảy ra lỗi",
+    "errorDescription": "Chúng tôi không thể tải nội dung này. Vui lòng thử lại.",
+    "retry": "Thử lại",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "page": "Trang"
+  }
+}

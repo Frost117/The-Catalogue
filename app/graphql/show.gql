@@ -1,0 +1,31 @@
+# Single show detail by slug + locale.
+#
+# NOTE: assumed schema shape — reconcile with the live Compose schema once
+# introspection runs (see shows.gql). Compose is expected to apply its own
+# locale → EN fallback chain server-side.
+#
+# Generates the `GqlShow` composable.
+query Show($slug: String!, $locale: String!) {
+  show(slug: $slug, locale: $locale) {
+    id
+    slug
+    title
+    summary
+    image
+    rating
+    genres
+    cast {
+      id
+      name
+      character
+      image
+    }
+    episodes {
+      id
+      season
+      number
+      name
+      summary
+    }
+  }
+}

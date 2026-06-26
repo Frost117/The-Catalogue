@@ -1,0 +1,37 @@
+# Catalogue query — paginated list with search + genre filter.
+#
+# NOTE: field/argument names below are an ASSUMED shape based on the
+# architecture doc (TV Maze data merged with DA/VI translations in Compose).
+# Once GQL_HOST points at the live endpoint, nuxt-graphql-client introspects
+# the real schema during codegen and will flag any mismatch here — reconcile
+# these names with the actual Compose schema at that point.
+#
+# Generates the `GqlShows` composable (from the operation name).
+query Shows(
+  $locale: String!
+  $page: Int
+  $pageSize: Int
+  $search: String
+  $genre: String
+) {
+  shows(
+    locale: $locale
+    page: $page
+    pageSize: $pageSize
+    search: $search
+    genre: $genre
+  ) {
+    items {
+      id
+      slug
+      title
+      summary
+      image
+      rating
+      genres
+    }
+    total
+    page
+    pageSize
+  }
+}

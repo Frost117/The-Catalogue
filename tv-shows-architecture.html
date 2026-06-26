@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Shows Platform — Architecture &amp; Requirements</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #0c0e13;
+    --surface: #14171e;
+    --surface-2: #1c2029;
+    --border: #2a2e3a;
+    --border-accent: #3d4250;
+    --text: #e2e4ea;
+    --text-muted: #8b8fa3;
+    --accent-blue: #4d9cf7;
+    --accent-teal: #3dd9b6;
+    --accent-orange: #f59e42;
+    --accent-pink: #e46a9a;
+    --accent-purple: #9b7cf7;
+    --accent-red: #f05c5c;
+    --umbraco-blue: #3544b1;
+    --compose-green: #2d9e6e;
+    --cloudflare-orange: #f6821f;
+    --vue-green: #42b883;
+    --tvmaze: #3c948b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .noise {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  header {
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue));
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.4rem;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+
+  nav.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    padding: 0 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  nav.tabs button {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 1rem 1.4rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  nav.tabs button:hover {
+    color: var(--text);
+    background: var(--surface-2);
+  }
+
+  nav.tabs button.active {
+    color: var(--accent-teal);
+    border-bottom-color: var(--accent-teal);
+  }
+
+  .tab-content {
+    display: none;
+    padding: 2.5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .tab-content.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  h2 .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.8rem;
+    color: var(--accent-blue);
+  }
+
+  /* ─── Architecture Diagram (SVG) ─── */
+  .diagram-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin-bottom: 2rem;
+  }
+
+  .diagram-wrap svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* ─── Cards ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.4rem;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--border-accent); }
+
+  .card .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 0.7rem;
+  }
+
+  .card h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p, .card li {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .card ul li {
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  .card ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--accent-teal);
+    font-weight: 700;
+  }
+
+  /* Tag colors */
+  .tag-frontend { background: rgba(66,184,131,0.15); color: var(--vue-green); }
+  .tag-compose { background: rgba(45,158,110,0.15); color: var(--compose-green); }
+  .tag-cloud { background: rgba(53,68,177,0.15); color: #7b8af7; }
+  .tag-external { background: rgba(60,148,139,0.15); color: var(--tvmaze); }
+  .tag-infra { background: rgba(246,130,31,0.15); color: var(--cloudflare-orange); }
+  .tag-data { background: rgba(155,124,247,0.15); color: var(--accent-purple); }
+  .tag-security { background: rgba(240,92,92,0.15); color: var(--accent-red); }
+  .tag-i18n { background: rgba(245,158,66,0.15); color: var(--accent-orange); }
+
+  /* ─── Flow / Sequence ─── */
+  .sequence {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 2rem;
+  }
+
+  .seq-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .seq-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .seq-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 28px;
+    width: 2px;
+    height: calc(100% - 4px);
+    z-index: 1;
+  }
+
+  .seq-body {
+    padding-bottom: 1.4rem;
+  }
+
+  .seq-body strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .seq-body span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* Read flow color */
+  .flow-read .seq-num { background: rgba(77,156,247,0.2); color: var(--accent-blue); }
+  .flow-read .seq-step::before { background: rgba(77,156,247,0.2); }
+
+  /* Write flow color */
+  .flow-write .seq-num { background: rgba(245,158,66,0.2); color: var(--accent-orange); }
+  .flow-write .seq-step::before { background: rgba(245,158,66,0.2); }
+
+  /* ─── Table ─── */
+  .req-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+  }
+
+  .req-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: left;
+    padding: 0.8rem 1rem;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .req-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+
+  .req-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .priority-high { color: var(--accent-red) !important; }
+  .priority-med { color: var(--accent-orange) !important; }
+  .priority-low { color: var(--accent-teal) !important; }
+
+  /* ─── Legend ─── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .note-box {
+    background: var(--surface);
+    border-left: 3px solid var(--accent-orange);
+    padding: 1rem 1.2rem;
+    margin: 1.5rem 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .note-box strong {
+    color: var(--accent-orange);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 768px) {
+    nav.tabs { flex-wrap: wrap; }
+    nav.tabs button { padding: 0.7rem 0.8rem; font-size: 0.7rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    .tab-content { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<header>
+  <h1>TV Shows Multilingual Platform</h1>
+  <p>Architecture &amp; Project Requirements — Vue.js + Umbraco Compose + Umbraco Cloud v17</p>
+</header>
+
+<nav class="tabs">
+  <button class="active" onclick="showTab('overview')">Overview</button>
+  <button onclick="showTab('architecture')">Architecture</button>
+  <button onclick="showTab('dataflow')">Data Flow</button>
+  <button onclick="showTab('components')">Components</button>
+  <button onclick="showTab('requirements')">Requirements</button>
+  <button onclick="showTab('risks')">Risks &amp; Decisions</button>
+</nav>
+
+<!-- ════════════════════════ TAB: OVERVIEW ════════════════════════ -->
+<section id="tab-overview" class="tab-content active">
+  <h2><span class="dot" style="background:var(--accent-teal)"></span>Project Overview</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-frontend">Frontend</span>
+      <h4>Vue.js SPA on Cloudflare Pages</h4>
+      <p>A multilingual single-page application (EN, DA, VI) that displays TV show catalogues, detail pages, and member comments. Hosted on Cloudflare Pages for edge delivery. All content is fetched via a single GraphQL endpoint from Umbraco Compose.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-compose">Content Hub</span>
+      <h4>Umbraco Compose (GraphQL API)</h4>
+      <p>Acts as the unified content aggregation layer. Merges three data sources into one GraphQL schema: TV Maze show data, translated content from Umbraco Cloud, and member comments. The frontend only ever talks to Compose.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-cloud">CMS</span>
+      <h4>Umbraco Cloud v17</h4>
+      <p>Managed by content editors for Danish and Vietnamese translations of TV show metadata (titles, descriptions, genres). Also hosts UI Builder for backoffice comment moderation. The REST API is used for the comment write path.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-external">External API</span>
+      <h4>TV Maze API</h4>
+      <p>Public REST API providing the canonical English-language TV show catalogue: titles, summaries, cast, episode guides, images, schedules, and ratings. The source of truth for show identity.</p>
+    </div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent-orange)"></span>Key Principles</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-data">Principle</span>
+      <h4>Single GraphQL Gateway</h4>
+      <p>The frontend never calls TV Maze or Umbraco Cloud directly for reads. Compose is the only read surface, keeping the frontend simple and decoupled from backend data source topology.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-data">Principle</span>
+      <h4>Separated Read / Write Paths</h4>
+      <p>Reads go through Compose GraphQL. Writes (comments) go directly from the frontend to the Umbraco Cloud REST API, bypassing Compose. This keeps the write path simple and avoids Compose becoming a write-through proxy.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-i18n">Principle</span>
+      <h4>English-first, Manual Translations</h4>
+      <p>TV Maze provides the English baseline. Content editors in Umbraco Cloud maintain DA and VI translations manually. Compose merges these into locale-aware content nodes served via GraphQL.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ TAB: ARCHITECTURE ════════════════════════ -->
+<section id="tab-architecture" class="tab-content">
+  <h2><span class="dot" style="background:var(--accent-blue)"></span>System Architecture</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--vue-green)"></div>Frontend (Vue.js)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--cloudflare-orange)"></div>Cloudflare Pages</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--compose-green)"></div>Umbraco Compose</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--umbraco-blue)"></div>Umbraco Cloud v17</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--tvmaze)"></div>TV Maze API</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div>Read (GraphQL)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-orange)"></div>Write (REST)</div>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" width="960" height="620" font-family="'JetBrains Mono', monospace">
+      <defs>
+        <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#4d9cf7"/>
+        </marker>
+        <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#f59e42"/>
+        </marker>
+        <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#3dd9b6"/>
+        </marker>
+        <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#9b7cf7"/>
+        </marker>
+      </defs>
+
+      <!-- Background regions -->
+      <rect x="20" y="10" width="920" height="100" rx="6" fill="#42b88310" stroke="#42b88330"/>
+      <text x="40" y="35" fill="#42b883" font-size="10" font-weight="700" text-transform="uppercase" letter-spacing="1">CLIENT TIER</text>
+
+      <rect x="20" y="130" width="920" height="180" rx="6" fill="#2d9e6e10" stroke="#2d9e6e30"/>
+      <text x="40" y="155" fill="#2d9e6e" font-size="10" font-weight="700" letter-spacing="1">AGGREGATION TIER</text>
+
+      <rect x="20" y="330" width="920" height="130" rx="6" fill="#3544b110" stroke="#3544b130"/>
+      <text x="40" y="355" fill="#7b8af7" font-size="10" font-weight="700" letter-spacing="1">CMS TIER</text>
+
+      <rect x="20" y="480" width="920" height="130" rx="6" fill="#3c948b10" stroke="#3c948b30"/>
+      <text x="40" y="505" fill="#3c948b" font-size="10" font-weight="700" letter-spacing="1">EXTERNAL DATA</text>
+
+      <!-- ─── Client Tier ─── -->
+      <!-- Browser -->
+      <rect x="120" y="45" width="200" height="50" rx="5" fill="#1c2029" stroke="#42b883" stroke-width="1.5"/>
+      <text x="220" y="67" fill="#42b883" font-size="12" font-weight="700" text-anchor="middle">Vue.js SPA</text>
+      <text x="220" y="82" fill="#8b8fa3" font-size="9" text-anchor="middle">EN · DA · VI</text>
+
+      <!-- Cloudflare -->
+      <rect x="440" y="45" width="200" height="50" rx="5" fill="#1c2029" stroke="#f6821f" stroke-width="1.5"/>
+      <text x="540" y="67" fill="#f6821f" font-size="12" font-weight="700" text-anchor="middle">Cloudflare Pages</text>
+      <text x="540" y="82" fill="#8b8fa3" font-size="9" text-anchor="middle">Edge CDN + Static Hosting</text>
+
+      <!-- Members -->
+      <rect x="720" y="45" width="180" height="50" rx="5" fill="#1c2029" stroke="#e46a9a" stroke-width="1.5"/>
+      <text x="810" y="67" fill="#e46a9a" font-size="12" font-weight="700" text-anchor="middle">Members</text>
+      <text x="810" y="82" fill="#8b8fa3" font-size="9" text-anchor="middle">Authenticated Users</text>
+
+      <!-- Arrows: Vue <-> Cloudflare -->
+      <line x1="320" y1="70" x2="436" y2="70" stroke="#8b8fa3" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="378" y="63" fill="#8b8fa3" font-size="8" text-anchor="middle">hosts</text>
+
+      <!-- Arrow: Members -> Vue -->
+      <line x1="720" y1="70" x2="324" y2="70" stroke="#e46a9a" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <!-- ─── Aggregation Tier: Compose ─── -->
+      <rect x="280" y="175" width="400" height="90" rx="6" fill="#1c2029" stroke="#2d9e6e" stroke-width="2"/>
+      <text x="480" y="200" fill="#2d9e6e" font-size="14" font-weight="700" text-anchor="middle">Umbraco Compose</text>
+      <text x="480" y="218" fill="#8b8fa3" font-size="9" text-anchor="middle">Content Aggregation &amp; GraphQL API</text>
+
+      <!-- Compose internal boxes -->
+      <rect x="300" y="228" width="100" height="28" rx="3" fill="#2d9e6e20" stroke="#2d9e6e50"/>
+      <text x="350" y="246" fill="#3dd9b6" font-size="8.5" font-weight="600" text-anchor="middle">TV Show Data</text>
+
+      <rect x="420" y="228" width="120" height="28" rx="3" fill="#2d9e6e20" stroke="#2d9e6e50"/>
+      <text x="480" y="246" fill="#3dd9b6" font-size="8.5" font-weight="600" text-anchor="middle">Translations</text>
+
+      <rect x="560" y="228" width="100" height="28" rx="3" fill="#2d9e6e20" stroke="#2d9e6e50"/>
+      <text x="610" y="246" fill="#3dd9b6" font-size="8.5" font-weight="600" text-anchor="middle">Comments</text>
+
+      <!-- Arrow: Vue -> Compose (GraphQL READ) -->
+      <line x1="220" y1="95" x2="220" y2="208" stroke="#4d9cf7" stroke-width="1.5" stroke-dasharray="0"/>
+      <line x1="220" y1="208" x2="276" y2="208" stroke="#4d9cf7" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+      <text x="200" y="150" fill="#4d9cf7" font-size="9" font-weight="600" text-anchor="end">GraphQL</text>
+      <text x="200" y="162" fill="#4d9cf780" font-size="8" text-anchor="end">READ</text>
+
+      <!-- Arrow: Vue -> Umbraco Cloud (REST WRITE) -->
+      <path d="M 200,95 L 200,390 L 276,390" fill="none" stroke="#f59e42" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowOrange)"/>
+      <text x="180" y="300" fill="#f59e42" font-size="9" font-weight="600" text-anchor="end">REST API</text>
+      <text x="180" y="312" fill="#f59e4280" font-size="8" text-anchor="end">WRITE comments</text>
+
+      <!-- ─── CMS Tier: Umbraco Cloud ─── -->
+      <rect x="280" y="360" width="400" height="80" rx="6" fill="#1c2029" stroke="#3544b1" stroke-width="2"/>
+      <text x="480" y="385" fill="#7b8af7" font-size="14" font-weight="700" text-anchor="middle">Umbraco Cloud v17</text>
+      <text x="480" y="402" fill="#8b8fa3" font-size="9" text-anchor="middle">CMS + UI Builder (Comments) + Content API</text>
+
+      <!-- Cloud internal boxes -->
+      <rect x="300" y="412" width="110" height="22" rx="3" fill="#3544b115" stroke="#3544b140"/>
+      <text x="355" y="427" fill="#7b8af7" font-size="8" font-weight="600" text-anchor="middle">DA/VI Content</text>
+
+      <rect x="425" y="412" width="110" height="22" rx="3" fill="#3544b115" stroke="#3544b140"/>
+      <text x="480" y="427" fill="#7b8af7" font-size="8" font-weight="600" text-anchor="middle">UI Builder</text>
+
+      <rect x="550" y="412" width="110" height="22" rx="3" fill="#3544b115" stroke="#3544b140"/>
+      <text x="605" y="427" fill="#7b8af7" font-size="8" font-weight="600" text-anchor="middle">Comments DB</text>
+
+      <!-- Arrow: Cloud -> Compose (translations sync) -->
+      <line x1="480" y1="360" x2="480" y2="269" stroke="#9b7cf7" stroke-width="1.5" marker-end="url(#arrowPurple)"/>
+      <text x="490" y="320" fill="#9b7cf7" font-size="8.5" font-weight="600">Translations + Comments</text>
+      <text x="490" y="332" fill="#9b7cf780" font-size="8">sync to Compose</text>
+
+      <!-- ─── External: TV Maze ─── -->
+      <rect x="340" y="520" width="280" height="60" rx="6" fill="#1c2029" stroke="#3c948b" stroke-width="2"/>
+      <text x="480" y="547" fill="#3c948b" font-size="14" font-weight="700" text-anchor="middle">TV Maze API</text>
+      <text x="480" y="563" fill="#8b8fa3" font-size="9" text-anchor="middle">Public REST · English catalogue</text>
+
+      <!-- Arrow: TV Maze -> Compose -->
+      <line x1="480" y1="520" x2="480" y2="465" stroke="#3dd9b6" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="490" y="496" fill="#3dd9b6" font-size="8.5" font-weight="600">Ingest shows</text>
+
+      <!-- Indirect: TV Maze through Cloud or direct to Compose -->
+      <path d="M 380,520 L 380,465" fill="none" stroke="#3dd9b650" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- Arrow: TV Maze -> Compose (direct path shown too) -->
+      <path d="M 560,520 L 560,490 L 684,490 L 684,250 L 664,250" fill="none" stroke="#3dd9b6" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+      <text x="694" y="375" fill="#3dd9b6" font-size="8" font-weight="600" transform="rotate(-90, 694, 375)">REST fetch &amp; merge</text>
+
+      <!-- Content editors annotation -->
+      <rect x="750" y="365" width="170" height="50" rx="5" fill="#1c2029" stroke="#8b8fa350"/>
+      <text x="835" y="387" fill="#8b8fa3" font-size="10" font-weight="600" text-anchor="middle">Content Editors</text>
+      <text x="835" y="402" fill="#8b8fa370" font-size="8" text-anchor="middle">Manual DA + VI translations</text>
+      <line x1="750" y1="390" x2="684" y2="390" stroke="#8b8fa350" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowPurple)"/>
+    </svg>
+  </div>
+
+  <div class="note-box">
+    <strong>Note:</strong> The write path (orange dashed line) for comments goes directly from the Vue.js frontend to the Umbraco Cloud REST API, bypassing Compose entirely. Compose then reads the comments from the Cloud database for its GraphQL responses. This avoids turning Compose into a write-through proxy.
+  </div>
+</section>
+
+<!-- ════════════════════════ TAB: DATA FLOW ════════════════════════ -->
+<section id="tab-dataflow" class="tab-content">
+  <h2><span class="dot" style="background:var(--accent-blue)"></span>Read Path — Fetching TV Show Data</h2>
+  <div class="sequence flow-read">
+    <div class="seq-step">
+      <div class="seq-num">1</div>
+      <div class="seq-body">
+        <strong>User visits page (e.g. /da/shows/breaking-bad)</strong>
+        <span>Vue.js router resolves locale (DA) and show slug. Fires a GraphQL query to Compose with locale and show identifier.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">2</div>
+      <div class="seq-body">
+        <strong>Compose receives GraphQL request</strong>
+        <span>Compose resolves the query against its internal merged content graph. The graph is pre-built from three ingested sources.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">3</div>
+      <div class="seq-body">
+        <strong>Source A — TV Maze (English baseline)</strong>
+        <span>Compose has previously ingested show data from TV Maze REST API (title, summary, cast, episodes, images, rating). This is the canonical EN content and the show's identity key.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">4</div>
+      <div class="seq-body">
+        <strong>Source B — Umbraco Cloud (DA/VI translations)</strong>
+        <span>Compose pulls translated content maintained by editors in the Cloud v17 backoffice. Translations are linked to TV Maze show IDs. For DA locale requests, these override the English defaults.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">5</div>
+      <div class="seq-body">
+        <strong>Source C — Umbraco Cloud (Comments)</strong>
+        <span>Compose reads the comments table managed by UI Builder. Comments are keyed by TV Maze show ID and include member ID, text, timestamp.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">6</div>
+      <div class="seq-body">
+        <strong>Compose returns merged response</strong>
+        <span>A single GraphQL response containing: show metadata (localized), episode list, cast, images, rating, and paginated comments. Frontend renders the page.</span>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent-orange)"></span>Write Path — Posting a Comment</h2>
+  <div class="sequence flow-write">
+    <div class="seq-step">
+      <div class="seq-num">1</div>
+      <div class="seq-body">
+        <strong>Authenticated member submits comment</strong>
+        <span>Vue.js collects show ID, comment text, and the member's auth token. Sends a POST request directly to the Umbraco Cloud REST API endpoint.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">2</div>
+      <div class="seq-body">
+        <strong>Umbraco Cloud validates and persists</strong>
+        <span>The REST API validates the auth token, checks rate limits, sanitizes input, and writes the comment to the database table that UI Builder manages.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">3</div>
+      <div class="seq-body">
+        <strong>UI Builder reflects new comment</strong>
+        <span>Backoffice editors can see the new comment in the UI Builder dashboard for moderation (approve, flag, delete).</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">4</div>
+      <div class="seq-body">
+        <strong>Compose picks up comment on next read</strong>
+        <span>The next GraphQL query for this show's comments will include the newly written record (subject to Compose's sync/cache refresh interval).</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <strong>Latency consideration:</strong> There may be a short delay between writing a comment (REST to Cloud) and seeing it in GraphQL responses (Compose sync). The frontend should handle this with optimistic UI updates — show the comment immediately in the local state while the backend catches up.
+  </div>
+</section>
+
+<!-- ════════════════════════ TAB: COMPONENTS ════════════════════════ -->
+<section id="tab-components" class="tab-content">
+  <h2><span class="dot" style="background:var(--accent-purple)"></span>System Components</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-frontend">Frontend</span>
+      <h4>Vue.js Application</h4>
+      <ul>
+        <li>Vue 3 + Composition API + Vue Router</li>
+        <li>i18n with vue-i18n (EN, DA, VI)</li>
+        <li>Apollo Client or urql for GraphQL</li>
+        <li>Locale-prefixed routes (/en/, /da/, /vi/)</li>
+        <li>Auth state for member sessions</li>
+        <li>Optimistic comment rendering</li>
+        <li>SSG or SSR via Nuxt for SEO (optional)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag tag-infra">Hosting</span>
+      <h4>Cloudflare Pages</h4>
+      <ul>
+        <li>Static site deployment from Git</li>
+        <li>Edge caching for static assets</li>
+        <li>Custom domain + SSL</li>
+        <li>Cloudflare Workers for API proxying or edge redirects (optional)</li>
+        <li>Preview deployments per PR</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag tag-compose">Aggregation</span>
+      <h4>Umbraco Compose</h4>
+      <ul>
+        <li>Content source: TV Maze REST API</li>
+        <li>Content source: Umbraco Cloud Content Delivery API</li>
+        <li>Content source: Umbraco Cloud DB (comments)</li>
+        <li>GraphQL schema stitching / merging</li>
+        <li>Locale-aware field resolution</li>
+        <li>Caching layer for external API calls</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag tag-cloud">CMS</span>
+      <h4>Umbraco Cloud v17</h4>
+      <ul>
+        <li>Content types for translated show metadata</li>
+        <li>Language variants: DA, VI</li>
+        <li>TV Maze ID as the foreign key field</li>
+        <li>Content Delivery API for translations</li>
+        <li>Custom REST endpoint for comment writes</li>
+        <li>Member authentication (token-based)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag tag-cloud">Backoffice</span>
+      <h4>UI Builder — Comment Management</h4>
+      <ul>
+        <li>Custom table: ShowComments</li>
+        <li>Fields: ShowId, MemberId, Text, CreatedAt, Status</li>
+        <li>Status workflow: Pending → Approved / Flagged / Deleted</li>
+        <li>Filters by show, date, status</li>
+        <li>Bulk actions for moderation</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag tag-external">External</span>
+      <h4>TV Maze API</h4>
+      <ul>
+        <li>GET /shows — full catalogue</li>
+        <li>GET /shows/:id — show detail</li>
+        <li>GET /shows/:id/episodes — episode list</li>
+        <li>GET /shows/:id/cast — cast info</li>
+        <li>Rate limiting: ~20 calls/10 seconds</li>
+        <li>No auth required (public API)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent-orange)"></span>Internationalization Strategy</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-i18n">i18n</span>
+      <h4>Content Localization Model</h4>
+      <ul>
+        <li>UI chrome (nav, buttons, labels) — managed in vue-i18n JSON files, shipped with the build</li>
+        <li>Show metadata (title, description) — EN from TV Maze, DA/VI from Umbraco Cloud editors</li>
+        <li>Comments — stored in the language they were written in (no translation)</li>
+        <li>Fallback chain: requested locale → EN → empty</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag tag-i18n">i18n</span>
+      <h4>Locale Routing</h4>
+      <ul>
+        <li>URL pattern: /:locale/shows/:slug</li>
+        <li>Default locale detection via Accept-Language or stored preference</li>
+        <li>Locale switcher component persists choice</li>
+        <li>Compose GraphQL accepts locale parameter and resolves appropriate content variant</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════ TAB: REQUIREMENTS ════════════════════════ -->
+<section id="tab-requirements" class="tab-content">
+  <h2><span class="dot" style="background:var(--accent-teal)"></span>Functional Requirements</h2>
+  <table class="req-table">
+    <thead>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Component</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FR-01</td><td>Display paginated TV show catalogue with search and genre filtering</td><td class="priority-high">High</td><td>Frontend + Compose</td></tr>
+      <tr><td>FR-02</td><td>Show detail page with localized title, description, cast, episodes, and images</td><td class="priority-high">High</td><td>Frontend + Compose</td></tr>
+      <tr><td>FR-03</td><td>Language switcher supporting EN, DA, VI with locale-prefixed URLs</td><td class="priority-high">High</td><td>Frontend</td></tr>
+      <tr><td>FR-04</td><td>Fallback to EN content when DA/VI translation is missing</td><td class="priority-high">High</td><td>Compose + Frontend</td></tr>
+      <tr><td>FR-05</td><td>Member registration and authentication</td><td class="priority-high">High</td><td>Umbraco Cloud</td></tr>
+      <tr><td>FR-06</td><td>Authenticated members can post comments on TV shows</td><td class="priority-high">High</td><td>Frontend + Cloud REST</td></tr>
+      <tr><td>FR-07</td><td>Comments displayed on show detail page (paginated, newest first)</td><td class="priority-high">High</td><td>Frontend + Compose</td></tr>
+      <tr><td>FR-08</td><td>Backoffice comment moderation via UI Builder (approve, flag, delete)</td><td class="priority-high">High</td><td>Umbraco Cloud</td></tr>
+      <tr><td>FR-09</td><td>Content editors can create/edit DA and VI translations in the backoffice</td><td class="priority-high">High</td><td>Umbraco Cloud</td></tr>
+      <tr><td>FR-10</td><td>Optimistic UI for comment submission (show immediately, sync in background)</td><td class="priority-med">Medium</td><td>Frontend</td></tr>
+      <tr><td>FR-11</td><td>Compose merges TV Maze + Cloud translations + comments into unified GraphQL schema</td><td class="priority-high">High</td><td>Compose</td></tr>
+      <tr><td>FR-12</td><td>TV Maze data ingestion on a scheduled basis (new shows, updated metadata)</td><td class="priority-med">Medium</td><td>Compose</td></tr>
+      <tr><td>FR-13</td><td>Show rating display sourced from TV Maze</td><td class="priority-low">Low</td><td>Frontend + Compose</td></tr>
+      <tr><td>FR-14</td><td>Episode guide with season/episode navigation</td><td class="priority-med">Medium</td><td>Frontend + Compose</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="dot" style="background:var(--accent-red)"></span>Non-Functional Requirements</h2>
+  <table class="req-table">
+    <thead>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>NFR-01</td><td>Page load under 2s on 3G for initial meaningful paint</td><td class="priority-high">High</td><td>Cloudflare edge caching + code splitting</td></tr>
+      <tr><td>NFR-02</td><td>GraphQL response time under 500ms (p95)</td><td class="priority-high">High</td><td>Compose caching strategy</td></tr>
+      <tr><td>NFR-03</td><td>Comment write latency under 1s (p95)</td><td class="priority-med">Medium</td><td>Direct REST to Cloud</td></tr>
+      <tr><td>NFR-04</td><td>CORS configured for Cloudflare domain on both Compose and Cloud endpoints</td><td class="priority-high">High</td><td>Security baseline</td></tr>
+      <tr><td>NFR-05</td><td>Rate limiting on comment POST endpoint (per member)</td><td class="priority-high">High</td><td>Abuse prevention</td></tr>
+      <tr><td>NFR-06</td><td>Input sanitization for comment text (XSS prevention)</td><td class="priority-high">High</td><td>Server-side on Cloud</td></tr>
+      <tr><td>NFR-07</td><td>SEO: server-rendered or pre-rendered HTML for show pages</td><td class="priority-med">Medium</td><td>Nuxt SSG/SSR or Cloudflare Workers</td></tr>
+      <tr><td>NFR-08</td><td>Accessibility: WCAG 2.1 AA compliance</td><td class="priority-med">Medium</td><td>Keyboard nav, screen readers, contrast</td></tr>
+      <tr><td>NFR-09</td><td>Compose-to-Cloud sync latency under 60s for new comments</td><td class="priority-med">Medium</td><td>Impacts comment visibility</td></tr>
+      <tr><td>NFR-10</td><td>Zero-downtime deployments for frontend via Cloudflare Pages</td><td class="priority-low">Low</td><td>Built-in with Cloudflare</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════════ TAB: RISKS ════════════════════════ -->
+<section id="tab-risks" class="tab-content">
+  <h2><span class="dot" style="background:var(--accent-red)"></span>Technical Risks &amp; Open Decisions</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="tag tag-security">Risk</span>
+      <h4>Comment Write Path Bypasses Compose</h4>
+      <p>The frontend writes directly to the Umbraco Cloud database via REST. This means the Cloud REST API is exposed to the public internet. Requires robust auth validation, rate limiting, input sanitization, and CORS restrictions. Consider a Cloudflare Worker as a thin proxy to add an extra layer.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-data">Risk</span>
+      <h4>Compose Sync Latency</h4>
+      <p>There's an eventual consistency gap between a comment being written to Cloud and appearing in Compose's GraphQL responses. The frontend needs optimistic rendering, but also needs to reconcile if a comment fails server-side validation or moderation.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-external">Risk</span>
+      <h4>TV Maze API Reliability</h4>
+      <p>TV Maze is a free public API with rate limits. If it goes down or throttles, Compose needs to serve stale cached data gracefully. Need a caching and retry strategy in Compose, and monitoring for API health.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-i18n">Risk</span>
+      <h4>Translation Coverage Gaps</h4>
+      <p>Not all shows will have DA/VI translations. The fallback-to-English strategy works, but the UX should clearly indicate when content is displayed in a non-requested language. Editors need a dashboard showing untranslated content.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-cloud">Decision</span>
+      <h4>How Does Compose Ingest Comments?</h4>
+      <p>Does Compose poll the Cloud database on a schedule? Subscribe to webhooks? Read from a shared database connection? This is a key architectural decision that affects freshness, coupling, and operational complexity.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-cloud">Decision</span>
+      <h4>Member Auth Architecture</h4>
+      <p>Members authenticate against Umbraco Cloud. The Vue.js frontend needs to obtain and manage tokens. Does the frontend use Umbraco's member login endpoint directly, or is there an OAuth/OIDC flow? Token refresh strategy for long sessions?</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-compose">Decision</span>
+      <h4>Compose Content Modelling</h4>
+      <p>How are TV Maze shows represented in Compose? As imported content nodes? As external data source references? How are translations linked — by a shared TV Maze ID field? The content model in Compose determines the GraphQL schema shape.</p>
+    </div>
+    <div class="card">
+      <span class="tag tag-infra">Decision</span>
+      <h4>SEO Rendering Strategy</h4>
+      <p>Pure SPA with client-side rendering will hurt SEO for show pages. Options: Nuxt.js for SSR/SSG, Cloudflare Workers for dynamic rendering, or a pre-rendering service. This affects the build pipeline and deployment model significantly.</p>
+    </div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent-orange)"></span>Recommended Next Steps</h2>
+  <div class="sequence flow-write">
+    <div class="seq-step">
+      <div class="seq-num">1</div>
+      <div class="seq-body">
+        <strong>Finalize Compose content model &amp; GraphQL schema</strong>
+        <span>Define how TV Maze shows, translations, and comments are modelled in Compose. Mock the GraphQL schema the frontend will consume. This is the contract between frontend and backend.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">2</div>
+      <div class="seq-body">
+        <strong>Decide Compose ↔ Cloud sync mechanism</strong>
+        <span>Webhooks from Cloud on content publish for translations? Polling or direct DB read for comments? Document the sync strategy and its latency implications.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">3</div>
+      <div class="seq-body">
+        <strong>Design the member auth flow end-to-end</strong>
+        <span>Map the login/register flow from Vue.js through to Umbraco Cloud member endpoints. Define token format, storage, refresh, and how it's validated on the comment write endpoint.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">4</div>
+      <div class="seq-body">
+        <strong>Prototype the comment write ↔ read loop</strong>
+        <span>Build the riskiest path first: member posts comment via REST → Cloud persists → Compose picks up → GraphQL returns it. Validate the latency and consistency model.</span>
+      </div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-num">5</div>
+      <div class="seq-body">
+        <strong>Set up CI/CD and environments</strong>
+        <span>Cloudflare Pages from Git for frontend. Umbraco Cloud environments (Dev → Staging → Live). Compose deployment pipeline. Preview environments for PRs.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

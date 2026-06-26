@@ -1,0 +1,29 @@
+{
+  "name": "TvShowCatalog",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.114",
+    "@iconify-json/simple-icons": "^1.2.86",
+    "@nuxt/ui": "^4.9.0",
+    "@nuxtjs/i18n": "^10.4.0",
+    "nuxt": "^4.4.8",
+    "nuxt-graphql-client": "^0.2.46",
+    "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.16.0",
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.5"
+  },
+  "packageManager": "pnpm@11.8.0"
+}

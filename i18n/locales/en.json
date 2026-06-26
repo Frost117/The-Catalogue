@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "TV Shows",
+    "tagline": "Browse TV shows in your language"
+  },
+  "nav": {
+    "catalogue": "Catalogue",
+    "home": "Home"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "da": "Dansk",
+    "vi": "Tiếng Việt"
+  },
+  "catalogue": {
+    "title": "TV Shows",
+    "searchPlaceholder": "Search shows…",
+    "genreLabel": "Genre",
+    "allGenres": "All genres",
+    "resultsCount": "{count} shows",
+    "noResults": "No shows match your search.",
+    "clearFilters": "Clear filters"
+  },
+  "show": {
+    "rating": "Rating",
+    "genres": "Genres",
+    "summary": "Summary",
+    "cast": "Cast",
+    "episodes": "Episodes",
+    "season": "Season {number}",
+    "episode": "Episode {number}",
+    "noSummary": "No summary available.",
+    "noCast": "No cast information available.",
+    "noEpisodes": "No episodes available.",
+    "back": "Back to catalogue",
+    "notFound": "Show not found",
+    "notFoundDescription": "We couldn’t find the show you were looking for."
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "errorDescription": "We couldn’t load this content. Please try again.",
+    "retry": "Retry",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page"
+  }
+}

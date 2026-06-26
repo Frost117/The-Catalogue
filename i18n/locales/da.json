@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "TV-serier",
+    "tagline": "Gennemse tv-serier på dit sprog"
+  },
+  "nav": {
+    "catalogue": "Katalog",
+    "home": "Forside"
+  },
+  "locale": {
+    "label": "Sprog",
+    "en": "English",
+    "da": "Dansk",
+    "vi": "Tiếng Việt"
+  },
+  "catalogue": {
+    "title": "TV-serier",
+    "searchPlaceholder": "Søg efter serier…",
+    "genreLabel": "Genre",
+    "allGenres": "Alle genrer",
+    "resultsCount": "{count} serier",
+    "noResults": "Ingen serier matcher din søgning.",
+    "clearFilters": "Ryd filtre"
+  },
+  "show": {
+    "rating": "Bedømmelse",
+    "genres": "Genrer",
+    "summary": "Resumé",
+    "cast": "Medvirkende",
+    "episodes": "Afsnit",
+    "season": "Sæson {number}",
+    "episode": "Afsnit {number}",
+    "noSummary": "Intet resumé tilgængeligt.",
+    "noCast": "Ingen oplysninger om medvirkende.",
+    "noEpisodes": "Ingen afsnit tilgængelige.",
+    "back": "Tilbage til kataloget",
+    "notFound": "Serie ikke fundet",
+    "notFoundDescription": "Vi kunne ikke finde den serie, du ledte efter."
+  },
+  "common": {
+    "loading": "Indlæser…",
+    "error": "Noget gik galt",
+    "errorDescription": "Vi kunne ikke indlæse indholdet. Prøv igen.",
+    "retry": "Prøv igen",
+    "previous": "Forrige",
+    "next": "Næste",
+    "page": "Side"
+  }
+}

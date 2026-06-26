@@ -1,0 +1,11 @@
+# Genre list for the catalogue filter.
+#
+# NOTE: assumed schema shape — reconcile with the live Compose schema once
+# introspection runs (see shows.gql). If Compose has no dedicated `genres`
+# query, derive the genre list client-side from the catalogue results instead
+# and delete this document.
+#
+# Generates the `GqlGenres` composable.
+query Genres($locale: String!) {
+  genres(locale: $locale)
+}
