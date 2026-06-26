@@ -15,11 +15,11 @@ const summary = computed(() => stripHtml(props.show.summary))
 <template>
   <UCard
     :to="to"
-    class="group h-full transition-shadow hover:shadow-lg"
-    :ui="{ body: 'flex flex-col gap-2' }"
+    class="group h-full overflow-hidden transition-shadow hover:shadow-lg"
+    :ui="{ body: 'flex flex-col gap-2', header: 'p-0 sm:p-0' }"
   >
     <template #header>
-      <div class="aspect-2/3 w-full overflow-hidden rounded-md bg-elevated">
+      <div class="aspect-2/3 w-full overflow-hidden bg-elevated">
         <img
           v-if="show.image"
           :src="show.image"
