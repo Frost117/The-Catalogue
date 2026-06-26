@@ -20,7 +20,8 @@
     "allGenres": "Alle genrer",
     "resultsCount": "{count} serier",
     "noResults": "Ingen serier matcher din søgning.",
-    "clearFilters": "Ryd filtre"
+    "clearFilters": "Ryd filtre",
+    "loadMore": "Indlæs flere"
   },
   "show": {
     "rating": "Bedømmelse",
@@ -44,6 +45,7 @@
     "retry": "Prøv igen",
     "previous": "Forrige",
     "next": "Næste",
-    "page": "Side"
+    "page": "Side",
+    "fallbackNotice": "Viser indhold på {language} — endnu ikke tilgængeligt på dit sprog."
   }
 }

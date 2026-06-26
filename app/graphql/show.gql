@@ -1,31 +1,47 @@
-# Single show detail by slug + locale.
+# Single show detail, matched by locale variant + route path.
 #
-# NOTE: assumed schema shape — reconcile with the live Compose schema once
-# introspection runs (see shows.gql). Compose is expected to apply its own
-# locale → EN fallback chain server-side.
-#
-# Generates the `GqlShow` composable.
-query Show($slug: String!, $locale: String!) {
-  show(slug: $slug, locale: $locale) {
-    id
-    slug
-    title
-    summary
-    image
-    rating
-    genres
-    cast {
-      id
-      name
-      character
-      image
-    }
-    episodes {
-      id
-      season
-      number
-      name
-      summary
+# The `where` filter ({ show: { variant, route: { path } } }) is built in
+# ~/composables/useShowQuery. Episodes are NOT nested under a show in this
+# schema — they are sibling content nodes addressed by route-path prefix, so
+# they are fetched separately (see episodes.gql). Summary is RichText (use
+# .markup); cast is a block list of CastMember elements.
+query Show($where: NodeFilterInput!) {
+  tvshow_collection(first: 1, where: $where) {
+    items {
+      ... on Show {
+        id
+        variant
+        name
+        route {
+          path
+        }
+        properties {
+          image
+          rating
+          genres
+          status
+          network
+          premiered
+          summary {
+            markup
+          }
+          cast {
+            items {
+              content {
+                ... on CastMember {
+                  id
+                  properties {
+                    personName
+                    characterName
+                    personImage
+                    characterImage
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

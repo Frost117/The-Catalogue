@@ -1,11 +1,18 @@
 # Genre list for the catalogue filter.
 #
-# NOTE: assumed schema shape — reconcile with the live Compose schema once
-# introspection runs (see shows.gql). If Compose has no dedicated `genres`
-# query, derive the genre list client-side from the catalogue results instead
-# and delete this document.
-#
-# Generates the `GqlGenres` composable.
-query Genres($locale: String!) {
-  genres(locale: $locale)
+# The schema has no dedicated `genres` query, so the list is derived: fetch the
+# shows' genre arrays and dedupe client-side (see ~/composables/useGenresQuery).
+# Genres are not localised in the data (always English), but we still query by
+# variant so the request honours the active locale / fallback. The catalogue is
+# small (~20 shows), so a single first:100 page covers the whole genre set.
+query Genres($where: NodeFilterInput!) {
+  tvshow_collection(first: 100, where: $where) {
+    items {
+      ... on Show {
+        properties {
+          genres
+        }
+      }
+    }
+  }
 }

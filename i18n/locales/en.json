@@ -20,7 +20,8 @@
     "allGenres": "All genres",
     "resultsCount": "{count} shows",
     "noResults": "No shows match your search.",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "loadMore": "Load more"
   },
   "show": {
     "rating": "Rating",
@@ -44,6 +45,7 @@
     "retry": "Retry",
     "previous": "Previous",
     "next": "Next",
-    "page": "Page"
+    "page": "Page",
+    "fallbackNotice": "Showing content in {language} — not yet available in your language."
   }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatRating, stripHtml } from '~/utils/showHelpers'
 import type { ShowSummary } from '~/types/show'
 
 const props = defineProps<{ show: ShowSummary }>()

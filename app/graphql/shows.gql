@@ -1,37 +1,39 @@
-# Catalogue query — paginated list with search + genre filter.
+# Catalogue query — cursor-paginated Show list with optional search + genre
+# filter, alphabetised by title.
 #
-# NOTE: field/argument names below are an ASSUMED shape based on the
-# architecture doc (TV Maze data merged with DA/VI translations in Compose).
-# Once GQL_HOST points at the live endpoint, nuxt-graphql-client introspects
-# the real schema during codegen and will flag any mismatch here — reconcile
-# these names with the actual Compose schema at that point.
-#
-# Generates the `GqlShows` composable (from the operation name).
-query Shows(
-  $locale: String!
-  $page: Int
-  $pageSize: Int
-  $search: String
-  $genre: String
-) {
-  shows(
-    locale: $locale
-    page: $page
-    pageSize: $pageSize
-    search: $search
-    genre: $genre
+# The `where` filter is built in the composable (~/composables/useShowsQuery)
+# and passed as a NodeFilterInput variable, so optional filters can be omitted
+# entirely rather than sent as nulls. `tvshow_collection` caps `first` at 100.
+# There is no totalCount on this endpoint, so pagination is cursor-based
+# (pageInfo) and the UI uses a "load more" affordance.
+query Shows($where: NodeFilterInput!, $first: Int!, $after: String) {
+  tvshow_collection(
+    first: $first
+    after: $after
+    where: $where
+    orderBy: [{ show: { name: ASC } }]
   ) {
     items {
-      id
-      slug
-      title
-      summary
-      image
-      rating
-      genres
+      ... on Show {
+        id
+        variant
+        name
+        route {
+          path
+        }
+        properties {
+          image
+          rating
+          genres
+          summary {
+            markup
+          }
+        }
+      }
     }
-    total
-    page
-    pageSize
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
   }
 }

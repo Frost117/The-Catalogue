@@ -1,7 +1,8 @@
-// Domain types for TV show content returned by the Compose GraphQL endpoint.
-// These mirror the assumed schema shape in app/graphql/*.gql. Once the live
-// schema is introspected (codegen), these can be replaced by the generated
-// types — keep them as the contract used across components until then.
+// Domain types the UI depends on. These are the clean, stable shape that
+// components consume; they are mapped from the raw Compose responses
+// (~/types/compose) by ~/utils/mapShow. Keeping this contract separate from the
+// raw schema means a schema tweak only ripples through the mapper, not the
+// components.
 
 export interface CastMember {
   id: string
@@ -15,13 +16,16 @@ export interface Episode {
   season: number
   number: number
   name: string
+  // Raw HTML markup (RichText); strip with stripHtml() before rendering.
   summary?: string | null
 }
 
 export interface ShowSummary {
   id: string
+  // Locale-specific slug, derived from the content node's route path.
   slug: string
   title: string
+  // Raw HTML markup (RichText); strip with stripHtml() before rendering.
   summary?: string | null
   image?: string | null
   rating?: number | null
@@ -29,15 +33,11 @@ export interface ShowSummary {
 }
 
 export interface Show extends ShowSummary {
+  status?: string | null
+  network?: string | null
+  premiered?: string | null
   cast: CastMember[]
   episodes: Episode[]
-}
-
-export interface ShowsResult {
-  items: ShowSummary[]
-  total: number
-  page: number
-  pageSize: number
 }
 
 export interface SeasonGroup {

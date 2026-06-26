@@ -1,0 +1,32 @@
+# Episodes for a show. Episodes are sibling content nodes whose route path
+# nests under the show's path (e.g. show "/bitten/" -> "/bitten/some-episode/"),
+# so they are matched by `route: { path_starts_with: <show path> }` plus the
+# locale variant. The trailing slash on the show path prevents prefix
+# collisions (e.g. "/pil/" not matching "/pilot/").
+#
+# `first` is capped at 100; the composable pages through with `after` until
+# pageInfo.hasNextPage is false to gather every episode.
+query Episodes($where: NodeFilterInput!, $after: String) {
+  tvshow_collection(first: 100, after: $after, where: $where) {
+    items {
+      ... on Episode {
+        id
+        name
+        route {
+          path
+        }
+        properties {
+          season
+          episodeNumber
+          summary {
+            markup
+          }
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

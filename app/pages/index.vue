@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { useShowsQuery } from '~/composables/useShowsQuery'
+import { useGenresQuery } from '~/composables/useGenresQuery'
+
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
-
-const pageSize = 24
 
 function firstQuery(value: unknown): string {
   if (Array.isArray(value)) {
@@ -15,29 +16,22 @@ function firstQuery(value: unknown): string {
 const searchInput = ref(firstQuery(route.query.q))
 const search = ref(searchInput.value)
 const genre = ref(firstQuery(route.query.genre))
-const page = ref(Math.max(1, Number(route.query.page) || 1))
 
-// Debounce typing into a committed search term; reset to page 1 on new search.
+// Debounce typing into a committed search term.
 let debounceTimer: ReturnType<typeof setTimeout> | undefined
 watch(searchInput, (value) => {
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
     search.value = value
-    page.value = 1
   }, 350)
 })
 
-watch(genre, () => {
-  page.value = 1
-})
-
-// Keep filter/pagination state in the URL so results are shareable + SSR-able.
-watch([search, genre, page], () => {
+// Keep filter state in the URL so results are shareable + SSR-able.
+watch([search, genre], () => {
   router.replace({
     query: {
       ...(search.value ? { q: search.value } : {}),
-      ...(genre.value ? { genre: genre.value } : {}),
-      ...(page.value > 1 ? { page: String(page.value) } : {})
+      ...(genre.value ? { genre: genre.value } : {})
     }
   })
 })
@@ -46,7 +40,7 @@ const { data: genres } = useGenresQuery(() => locale.value)
 
 // Reka UI's Select reserves the empty string for the cleared/placeholder
 // state, so the "all genres" item needs a non-empty sentinel value. `genre`
-// stays the source of truth ('' = no filter) for the query/URL logic below;
+// stays the source of truth ('' = no filter) for the query/URL logic above;
 // this proxy maps the sentinel <-> '' only at the Select boundary.
 const ALL_GENRES = '__all__'
 
@@ -62,24 +56,35 @@ const genreItems = computed(() => [
   ...(genres.value ?? []).map(g => ({ label: g, value: g }))
 ])
 
-const { data, status, error, refresh } = useShowsQuery(() => ({
+const {
+  items: shows,
+  hasMore,
+  loadMore,
+  loadingMore,
+  servedVariant,
+  status,
+  error,
+  refresh
+} = useShowsQuery(() => ({
   locale: locale.value,
-  page: page.value,
-  pageSize,
   search: search.value,
   genre: genre.value
 }))
 
-const shows = computed(() => data.value?.items ?? [])
-const total = computed(() => data.value?.total ?? 0)
 const pending = computed(() => status.value === 'pending')
 const hasFilters = computed(() => !!search.value || !!genre.value)
+
+// Content was served in a different language than requested (fallback chain).
+const fallbackLanguage = computed(() =>
+  servedVariant.value && servedVariant.value !== locale.value
+    ? t(`locale.${servedVariant.value}`)
+    : null
+)
 
 function clearFilters() {
   searchInput.value = ''
   search.value = ''
   genre.value = ''
-  page.value = 1
 }
 
 useSeoMeta({
@@ -119,11 +124,19 @@ useSeoMeta({
         />
       </div>
 
+      <UAlert
+        v-if="fallbackLanguage"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-languages"
+        :description="t('common.fallbackNotice', { language: fallbackLanguage })"
+      />
+
       <p
         v-if="!pending && !error"
         class="text-sm text-muted"
       >
-        {{ t('catalogue.resultsCount', { count: total }) }}
+        {{ t('catalogue.resultsCount', { count: shows.length }) }}
       </p>
     </div>
 
@@ -174,26 +187,28 @@ useSeoMeta({
     </div>
 
     <!-- Results -->
-    <div
-      v-else
-      class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-    >
-      <ShowCard
-        v-for="show in shows"
-        :key="show.id"
-        :show="show"
-      />
-    </div>
+    <template v-else>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <ShowCard
+          v-for="show in shows"
+          :key="show.id"
+          :show="show"
+        />
+      </div>
 
-    <div
-      v-if="total > pageSize"
-      class="mt-8 flex justify-center"
-    >
-      <UPagination
-        v-model:page="page"
-        :total="total"
-        :items-per-page="pageSize"
-      />
-    </div>
+      <div
+        v-if="hasMore"
+        class="mt-8 flex justify-center"
+      >
+        <UButton
+          color="neutral"
+          variant="soft"
+          size="lg"
+          :loading="loadingMore"
+          :label="t('catalogue.loadMore')"
+          @click="loadMore"
+        />
+      </div>
+    </template>
   </UContainer>
 </template>

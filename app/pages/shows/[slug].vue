@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import { useShowQuery } from '~/composables/useShowQuery'
+import { formatRating, formatYear, groupEpisodesBySeason, stripHtml } from '~/utils/showHelpers'
+
 const { t, locale } = useI18n()
 const route = useRoute()
 const localePath = useLocalePath()
 
 const slug = computed(() => String(route.params.slug))
 
-const { data: show, status, error, refresh } = await useShowQuery(
+const { data, status, error, refresh } = await useShowQuery(
   () => slug.value,
   () => locale.value
 )
+
+const show = computed(() => data.value?.show ?? null)
+const servedVariant = computed(() => data.value?.servedVariant ?? '')
 
 // 404 when the show genuinely doesn't exist (loaded, but null).
 if (!show.value && status.value !== 'pending' && !error.value) {
@@ -21,7 +27,15 @@ if (!show.value && status.value !== 'pending' && !error.value) {
 
 const rating = computed(() => formatRating(show.value?.rating))
 const summary = computed(() => stripHtml(show.value?.summary))
+const year = computed(() => formatYear(show.value?.premiered))
 const seasons = computed(() => groupEpisodesBySeason(show.value?.episodes ?? []))
+
+// Content was served in a different language than requested (fallback chain).
+const fallbackLanguage = computed(() =>
+  servedVariant.value && servedVariant.value !== locale.value
+    ? t(`locale.${servedVariant.value}`)
+    : null
+)
 
 useSeoMeta({
   title: () => show.value?.title ?? t('show.notFound'),
@@ -68,6 +82,15 @@ useSeoMeta({
     </div>
 
     <template v-else-if="show">
+      <UAlert
+        v-if="fallbackLanguage"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-languages"
+        class="mb-6"
+        :description="t('common.fallbackNotice', { language: fallbackLanguage })"
+      />
+
       <!-- Header -->
       <div class="flex flex-col gap-6 md:flex-row">
         <div class="aspect-2/3 w-full shrink-0 overflow-hidden rounded-lg bg-elevated md:w-64">
@@ -106,6 +129,17 @@ useSeoMeta({
               {{ rating }}
             </UBadge>
           </div>
+
+          <p
+            v-if="show.status || show.network || year"
+            class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted"
+          >
+            <span v-if="show.status">{{ show.status }}</span>
+            <span v-if="show.status && (show.network || year)">·</span>
+            <span v-if="show.network">{{ show.network }}</span>
+            <span v-if="show.network && year">·</span>
+            <span v-if="year">{{ year }}</span>
+          </p>
 
           <div
             v-if="show.genres?.length"

@@ -20,7 +20,8 @@
     "allGenres": "Tất cả thể loại",
     "resultsCount": "{count} chương trình",
     "noResults": "Không có chương trình nào phù hợp với tìm kiếm của bạn.",
-    "clearFilters": "Xóa bộ lọc"
+    "clearFilters": "Xóa bộ lọc",
+    "loadMore": "Tải thêm"
   },
   "show": {
     "rating": "Đánh giá",
@@ -44,6 +45,7 @@
     "retry": "Thử lại",
     "previous": "Trước",
     "next": "Tiếp",
-    "page": "Trang"
+    "page": "Trang",
+    "fallbackNotice": "Đang hiển thị nội dung bằng {language} — chưa có bằng ngôn ngữ của bạn."
   }
 }
