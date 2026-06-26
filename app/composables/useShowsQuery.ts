@@ -64,9 +64,20 @@ export function useShowsQuery(filters: () => CatalogueFilters) {
     'catalogue',
     async () => {
       const f = filters()
+      const hasFilter = !!(f.search || f.genre)
       let page = await fetchPage(f.locale, f, null)
+      // Fall back to the baseline only when the requested locale has NO content
+      // at all — not merely when an active filter matched nothing. A no-match
+      // filter should honour the filter and show an empty result in the
+      // requested locale, so when filtered we probe the locale unfiltered first
+      // to tell the two cases apart.
       if (page.items.length === 0 && f.locale !== BASELINE_VARIANT) {
-        page = await fetchPage(BASELINE_VARIANT, f, null)
+        const localeIsEmpty = hasFilter
+          ? (await fetchPage(f.locale, { ...f, search: '', genre: '' }, null)).items.length === 0
+          : true
+        if (localeIsEmpty) {
+          page = await fetchPage(BASELINE_VARIANT, f, null)
+        }
       }
       return page
     },
