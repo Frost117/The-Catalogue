@@ -14,7 +14,7 @@ const { data, status, error, refresh } = await useShowQuery(
 )
 
 const show = computed(() => data.value?.show ?? null)
-const servedVariant = computed(() => data.value?.servedVariant ?? '')
+const summaryLang = computed(() => data.value?.summaryLang ?? null)
 
 // 404 when the show genuinely doesn't exist (loaded, but null).
 if (!show.value && status.value !== 'pending' && !error.value) {
@@ -30,10 +30,11 @@ const summary = computed(() => stripHtml(show.value?.summary))
 const year = computed(() => formatYear(show.value?.premiered))
 const seasons = computed(() => groupEpisodesBySeason(show.value?.episodes ?? []))
 
-// Content was served in a different language than requested (fallback chain).
+// The summary was served in a different language than requested (only summaries
+// are localized in this schema; the fallback notice reflects that).
 const fallbackLanguage = computed(() =>
-  servedVariant.value && servedVariant.value !== locale.value
-    ? t(`locale.${servedVariant.value}`)
+  summaryLang.value && summaryLang.value !== locale.value
+    ? t(`locale.${summaryLang.value}`)
     : null
 )
 

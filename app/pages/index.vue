@@ -36,7 +36,7 @@ watch([search, genre], () => {
   })
 })
 
-const { data: genres } = useGenresQuery(() => locale.value)
+const { data: genres } = useGenresQuery()
 
 // Reka UI's Select reserves the empty string for the cleared/placeholder
 // state, so the "all genres" item needs a non-empty sentinel value. `genre`
@@ -61,7 +61,6 @@ const {
   hasMore,
   loadMore,
   loadingMore,
-  servedVariant,
   status,
   error,
   refresh
@@ -73,13 +72,6 @@ const {
 
 const pending = computed(() => status.value === 'pending')
 const hasFilters = computed(() => !!search.value || !!genre.value)
-
-// Content was served in a different language than requested (fallback chain).
-const fallbackLanguage = computed(() =>
-  servedVariant.value && servedVariant.value !== locale.value
-    ? t(`locale.${servedVariant.value}`)
-    : null
-)
 
 function clearFilters() {
   searchInput.value = ''
@@ -123,14 +115,6 @@ useSeoMeta({
           @click="clearFilters"
         />
       </div>
-
-      <UAlert
-        v-if="fallbackLanguage"
-        color="warning"
-        variant="subtle"
-        icon="i-lucide-languages"
-        :description="t('common.fallbackNotice', { language: fallbackLanguage })"
-      />
 
       <p
         v-if="!pending && !error"
