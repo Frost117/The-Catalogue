@@ -1,57 +1,112 @@
-import type { RawShow, RawEpisode } from '~/types/compose'
+import type { RawShow, RawEpisode, RawCast, RawLocalizedText } from '~/types/compose'
 import type { CastMember, Episode, Show, ShowSummary } from '~/types/show'
 
-// Compose exposes the slug only as part of the route path, e.g. "/bitten/".
-// Strip the surrounding slashes to get the slug used in app URLs.
-export function slugFromPath(path?: string | null): string {
-  return (path ?? '').replace(/^\/+|\/+$/g, '')
+// Coerce a GraphQL Decimal (which may arrive as number or string) to a number,
+// or null when absent.
+function toNum(value: number | string | null | undefined): number | null {
+  if (value === null || value === undefined) {
+    return null
+  }
+  const n = Number(value)
+  return Number.isNaN(n) ? null : n
 }
 
-export function mapShowSummary(raw: RawShow): ShowSummary {
-  const p = raw.properties
+// Summary is the only per-language field in this schema; when the requested
+// locale has no text yet, fall through this order. `lang` reports which language
+// actually served the text, so the detail page can surface a "not translated"
+// hint.
+const SUMMARY_FALLBACK = ['en', 'da', 'vi'] as const
+
+export function resolveLocalized(
+  text: RawLocalizedText | null | undefined,
+  locale: string
+): { text: string | null, lang: string | null } {
+  if (!text) {
+    return { text: null, lang: null }
+  }
+  const order = [locale, ...SUMMARY_FALLBACK.filter(l => l !== locale)]
+  for (const lang of order) {
+    const value = text[lang as keyof RawLocalizedText]
+    if (value) {
+      return { text: value, lang }
+    }
+  }
+  return { text: null, lang: null }
+}
+
+// The document key is namespaced `show-{tvMazeId}`; the numeric id is both the
+// stable route key and the `tvShowId` that links episodes/cast back to the show.
+export function showNumericId(nodeId: string): number | null {
+  const match = nodeId.match(/^show-(\d+)$/)
+  return match ? Number(match[1]) : null
+}
+
+function slugify(name?: string | null): string {
+  return (name ?? '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// URL slug for a show: readable name plus the numeric id so the detail page can
+// resolve it back with an exact id lookup (the schema has no server-side slug
+// field). e.g. show-1 "Under the Dome" -> "under-the-dome-1".
+export function showSlug(nodeId: string, name?: string | null): string {
+  const id = showNumericId(nodeId)
+  const base = slugify(name) || 'show'
+  return id != null ? `${base}-${id}` : base
+}
+
+// Inverse of showSlug: pull the trailing numeric id out of a URL slug.
+export function showIdFromSlug(slug: string): number | null {
+  const match = slug.match(/-(\d+)$/) ?? slug.match(/^(\d+)$/)
+  return match ? Number(match[1]) : null
+}
+
+export function mapShowSummary(raw: RawShow, locale: string): ShowSummary {
   return {
     id: raw.id,
-    slug: slugFromPath(raw.route?.path),
+    slug: showSlug(raw.id, raw.name),
     title: raw.name ?? '',
-    summary: p?.summary?.markup ?? null,
-    image: p?.image ?? null,
-    rating: p?.rating ?? null,
-    genres: (p?.genres ?? []).filter((g): g is string => !!g)
+    summary: resolveLocalized(raw.summary, locale).text,
+    image: raw.image?.medium ?? raw.image?.original ?? null,
+    rating: toNum(raw.rating?.average),
+    genres: (raw.genres ?? []).filter((g): g is string => !!g)
   }
 }
 
-export function mapCast(raw: RawShow): CastMember[] {
-  const items = raw.properties?.cast?.items ?? []
-  return items
-    .map(item => item?.content)
-    .filter((c): c is NonNullable<typeof c> => !!c)
-    .map(c => ({
-      id: c.id,
-      name: c.properties?.personName ?? '',
-      character: c.properties?.characterName ?? null,
-      image: c.properties?.personImage ?? null
-    }))
-}
-
-export function mapEpisode(raw: RawEpisode): Episode {
-  const p = raw.properties
+export function mapCast(raw: RawCast): CastMember {
   return {
     id: raw.id,
-    season: p?.season ?? 0,
-    number: p?.episodeNumber ?? 0,
-    name: raw.name ?? '',
-    summary: p?.summary?.markup ?? null
+    name: raw.person?.name ?? '',
+    character: raw.character?.name ?? null,
+    image: raw.person?.image?.medium ?? null
   }
 }
 
-export function mapShowDetail(raw: RawShow, episodes: RawEpisode[]): Show {
-  const p = raw.properties
+export function mapEpisode(raw: RawEpisode, locale: string): Episode {
   return {
-    ...mapShowSummary(raw),
-    status: p?.status ?? null,
-    network: p?.network ?? null,
-    premiered: p?.premiered ?? null,
-    cast: mapCast(raw),
-    episodes: episodes.map(mapEpisode)
+    id: raw.id,
+    season: toNum(raw.season) ?? 0,
+    number: toNum(raw.number) ?? 0,
+    name: raw.name ?? '',
+    summary: resolveLocalized(raw.summary, locale).text
+  }
+}
+
+export function mapShowDetail(
+  raw: RawShow,
+  episodes: RawEpisode[],
+  cast: RawCast[],
+  locale: string
+): Show {
+  return {
+    ...mapShowSummary(raw, locale),
+    status: raw.status ?? null,
+    network: raw.network?.name ?? null,
+    premiered: raw.premiered ?? null,
+    cast: cast.map(mapCast),
+    episodes: episodes.map(ep => mapEpisode(ep, locale))
   }
 }

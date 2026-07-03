@@ -1,41 +1,43 @@
 import showQuery from '~/graphql/show.gql?raw'
 import episodesQuery from '~/graphql/episodes.gql?raw'
+import castQuery from '~/graphql/cast.gql?raw'
 import { gqlRequest } from '~/utils/gqlRequest'
-import { mapShowDetail, slugFromPath } from '~/utils/mapShow'
-import { BASELINE_VARIANT } from '~/utils/contentVariant'
+import { mapShowDetail, resolveLocalized, showIdFromSlug } from '~/utils/mapShow'
 import type { Show } from '~/types/show'
-import type { RawNodeConnection, RawShow, RawEpisode } from '~/types/compose'
+import type { RawNodeConnection, RawShow, RawEpisode, RawCast } from '~/types/compose'
 
-// Guard against runaway paging; 10 × 100 = 1000 episodes is far beyond any
-// real show.
-const MAX_EPISODE_PAGES = 10
+// Guard against runaway paging; 10 × 100 = 1000 is far beyond any real show's
+// episode or cast count.
+const MAX_PAGES = 10
 
 export interface ShowDetailResult {
   show: Show
-  // The variant actually served — differs from the requested locale when the
-  // fallback chain kicked in (used to show a "not translated" hint).
-  servedVariant: string
+  // The language the summary was actually served in — differs from the requested
+  // locale when the fallback kicked in (used to show a "not translated" hint).
+  summaryLang: string | null
 }
 
-async function fetchShow(variant: string, slug: string): Promise<RawShow | null> {
+async function fetchShow(tvShowId: number): Promise<RawShow | null> {
   const res = await gqlRequest<{ tvshow_collection: RawNodeConnection<RawShow> }>(showQuery, {
-    where: { show: { variant, route: { path: `/${slug}/` } } }
+    where: { show: { id: `show-${tvShowId}` } }
   })
   return (res.tvshow_collection.items ?? []).find((s): s is RawShow => !!s) ?? null
 }
 
-async function fetchEpisodes(variant: string, showPath: string): Promise<RawEpisode[]> {
-  const all: RawEpisode[] = []
+// Episodes and cast are sibling nodes linked to the show by the numeric
+// `tvShowId`. Both are cursor-paginated, so page through until exhausted.
+async function fetchLinked<T>(query: string, key: 'episode' | 'cast', tvShowId: number): Promise<T[]> {
+  const all: T[] = []
   let after: string | null = null
-  for (let i = 0; i < MAX_EPISODE_PAGES; i++) {
-    const res = await gqlRequest<{ tvshow_collection: RawNodeConnection<RawEpisode> }>(
-      episodesQuery,
-      { where: { episode: { variant, route: { path_starts_with: showPath } } }, after }
-    )
-    const conn: RawNodeConnection<RawEpisode> = res.tvshow_collection
-    for (const ep of conn.items ?? []) {
-      if (ep) {
-        all.push(ep)
+  for (let i = 0; i < MAX_PAGES; i++) {
+    const res: { tvshow_collection: RawNodeConnection<T> } = await gqlRequest(query, {
+      where: { [key]: { tvShowId } },
+      after
+    })
+    const conn = res.tvshow_collection
+    for (const node of conn.items ?? []) {
+      if (node) {
+        all.push(node)
       }
     }
     if (!conn.pageInfo?.hasNextPage) {
@@ -46,27 +48,30 @@ async function fetchEpisodes(variant: string, showPath: string): Promise<RawEpis
   return all
 }
 
-// Single show detail by slug + locale. Applies the fallback chain (requested
-// locale → baseline → empty) and fetches the show's episodes by route-path
-// prefix in the same variant. Returns null when the show genuinely doesn't
-// exist so the page can 404.
+// Single show detail by slug + locale. The numeric id is parsed from the URL
+// slug and matched with an exact id lookup; episodes and cast are fetched by
+// `tvShowId`. Returns null when the show genuinely doesn't exist (or the slug
+// carries no id) so the page can 404.
 export function useShowQuery(slug: () => string, locale: () => string) {
   return useAsyncData<ShowDetailResult | null>(
     () => `show:${slug()}:${locale()}`,
     async () => {
-      const wanted = locale()
-      let variant = wanted
-      let raw = await fetchShow(variant, slug())
-      if (!raw && wanted !== BASELINE_VARIANT) {
-        variant = BASELINE_VARIANT
-        raw = await fetchShow(variant, slug())
+      const tvShowId = showIdFromSlug(slug())
+      if (tvShowId == null) {
+        return null
       }
+      const raw = await fetchShow(tvShowId)
       if (!raw) {
         return null
       }
-      const showPath = raw.route?.path ?? `/${slugFromPath(slug())}/`
-      const episodes = await fetchEpisodes(variant, showPath)
-      return { show: mapShowDetail(raw, episodes), servedVariant: variant }
+      const [episodes, cast] = await Promise.all([
+        fetchLinked<RawEpisode>(episodesQuery, 'episode', tvShowId),
+        fetchLinked<RawCast>(castQuery, 'cast', tvShowId)
+      ])
+      return {
+        show: mapShowDetail(raw, episodes, cast, locale()),
+        summaryLang: resolveLocalized(raw.summary, locale()).lang
+      }
     },
     { watch: [slug, locale] }
   )
