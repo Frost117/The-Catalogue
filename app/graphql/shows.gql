@@ -5,7 +5,8 @@
 # and passed as a NodeFilterInput variable, so optional filters can be omitted
 # entirely rather than sent as nulls. `tvshow_collection` caps `first` at 100.
 # There is no totalCount on this endpoint, so pagination is cursor-based
-# (pageInfo) and the UI uses a "load more" affordance.
+# (pageInfo) and the UI uses a "load more" affordance. Fields are flat on Show
+# now (no `properties`); `summary` is localized inline ({ en, da, vi }).
 query Shows($where: NodeFilterInput!, $first: Int!, $after: String) {
   tvshow_collection(
     first: $first
@@ -16,18 +17,19 @@ query Shows($where: NodeFilterInput!, $first: Int!, $after: String) {
     items {
       ... on Show {
         id
-        variant
         name
-        route {
-          path
+        genres
+        image {
+          medium
+          original
         }
-        properties {
-          image
-          rating
-          genres
-          summary {
-            markup
-          }
+        rating {
+          average
+        }
+        summary {
+          en
+          da
+          vi
         }
       }
     }

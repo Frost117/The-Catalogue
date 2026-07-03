@@ -3,61 +3,64 @@
 // consumes is mapped from these into the domain types in ~/types/show via
 // ~/utils/mapShow — keep this file as the literal API contract, and the domain
 // types as the clean shape components depend on.
+//
+// Schema shape (third-env): show / episode / cast are sibling nodes in a single
+// `tvshow_collection`, keyed by namespaced ids (`show-{id}`, `episode-{id}`,
+// `cast-{personId}-{characterId}`). There is no `route`/slug and no per-`variant`
+// node — `variant` is always null. Localization is inline per field: only
+// `summary` is translated (a { en, da, vi } object); everything else is shared.
+// Episodes and cast link back to their show via the numeric `tvShowId`.
 
-export interface RawRichText {
-  markup: string | null
+// Localized rich-text: TV Maze HTML markup per locale (strip before rendering).
+export interface RawLocalizedText {
+  en: string | null
+  da: string | null
+  vi: string | null
 }
 
-export interface RawRoute {
-  path: string | null
+export interface RawImage {
+  medium: string | null
+  original: string | null
 }
 
-export interface RawCastMemberProperties {
-  personName: string | null
-  characterName: string | null
-  personImage: string | null
-  characterImage: string | null
+export interface RawShowRating {
+  average: number | null
 }
 
-export interface RawCastMember {
-  id: string
-  properties: RawCastMemberProperties | null
-}
-
-export interface RawBlockItem {
-  content: RawCastMember | null
-}
-
-export interface RawShowProperties {
-  image: string | null
-  rating: number | null
-  status: string | null
-  network: string | null
-  premiered: string | null
-  genres: (string | null)[] | null
-  summary: RawRichText | null
-  cast: { items: (RawBlockItem | null)[] | null } | null
+export interface RawShowNetwork {
+  name: string | null
 }
 
 export interface RawShow {
   id: string
-  variant: string | null
   name: string | null
-  route: RawRoute | null
-  properties: RawShowProperties | null
-}
-
-export interface RawEpisodeProperties {
-  season: number | null
-  episodeNumber: number | null
-  summary: RawRichText | null
+  genres: (string | null)[] | null
+  status: string | null
+  premiered: string | null
+  network: RawShowNetwork | null
+  image: RawImage | null
+  rating: RawShowRating | null
+  summary: RawLocalizedText | null
 }
 
 export interface RawEpisode {
   id: string
   name: string | null
-  route: RawRoute | null
-  properties: RawEpisodeProperties | null
+  // `season` / `number` are GraphQL Decimals — coerce with Number() when mapping.
+  season: number | null
+  number: number | null
+  summary: RawLocalizedText | null
+}
+
+export interface RawCastParty {
+  name: string | null
+  image: RawImage | null
+}
+
+export interface RawCast {
+  id: string
+  person: RawCastParty | null
+  character: RawCastParty | null
 }
 
 export interface RawPageInfo {
@@ -67,7 +70,7 @@ export interface RawPageInfo {
 
 // `tvshow_collection` is a Relay-style connection. `items` is a flat list of
 // Node (interface) values; queries narrow it with `... on Show` / `... on
-// Episode` inline fragments, so callers parameterise T accordingly.
+// Episode` / `... on Cast` inline fragments, so callers parameterise T.
 export interface RawNodeConnection<T> {
   items: (T | null)[] | null
   pageInfo?: RawPageInfo

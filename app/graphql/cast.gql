@@ -1,0 +1,32 @@
+# Cast for a show. Cast members are sibling content nodes (type `Cast`) linked to
+# their show by the numeric `tvShowId`, each carrying a `person` and the
+# `character` they play (both with a name + image). Matched by
+# `{ cast: { tvShowId: <n> } }`.
+#
+# `first` is capped at 100; the composable pages through with `after` until
+# pageInfo.hasNextPage is false to gather every cast member.
+query Cast($where: NodeFilterInput!, $after: String) {
+  tvshow_collection(first: 100, after: $after, where: $where) {
+    items {
+      ... on Cast {
+        id
+        person {
+          name
+          image {
+            medium
+          }
+        }
+        character {
+          name
+          image {
+            medium
+          }
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

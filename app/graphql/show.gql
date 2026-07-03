@@ -1,45 +1,33 @@
-# Single show detail, matched by locale variant + route path.
+# Single show detail, matched by namespaced id ({ show: { id: "show-<n>" } }),
+# built in ~/composables/useShowQuery from the numeric id parsed out of the URL
+# slug.
 #
-# The `where` filter ({ show: { variant, route: { path } } }) is built in
-# ~/composables/useShowQuery. Episodes are NOT nested under a show in this
-# schema — they are sibling content nodes addressed by route-path prefix, so
-# they are fetched separately (see episodes.gql). Summary is RichText (use
-# .markup); cast is a block list of CastMember elements.
+# Episodes and cast are NOT nested under a show in this schema — they are sibling
+# content nodes linked by the numeric `tvShowId`, so they are fetched separately
+# (see episodes.gql / cast.gql). `summary` is localized inline ({ en, da, vi }).
 query Show($where: NodeFilterInput!) {
   tvshow_collection(first: 1, where: $where) {
     items {
       ... on Show {
         id
-        variant
         name
-        route {
-          path
+        genres
+        status
+        premiered
+        network {
+          name
         }
-        properties {
-          image
-          rating
-          genres
-          status
-          network
-          premiered
-          summary {
-            markup
-          }
-          cast {
-            items {
-              content {
-                ... on CastMember {
-                  id
-                  properties {
-                    personName
-                    characterName
-                    personImage
-                    characterImage
-                  }
-                }
-              }
-            }
-          }
+        image {
+          medium
+          original
+        }
+        rating {
+          average
+        }
+        summary {
+          en
+          da
+          vi
         }
       }
     }

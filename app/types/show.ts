@@ -22,11 +22,14 @@ export interface Episode {
 
 export interface ShowSummary {
   id: string
-  // Locale-specific slug, derived from the content node's route path.
+  // URL slug: readable name + numeric id (e.g. "under-the-dome-1"), built by
+  // ~/utils/mapShow.showSlug so the detail page can resolve it by exact id.
   slug: string
   title: string
-  // Raw HTML markup (RichText); strip with stripHtml() before rendering.
+  // Localized summary as raw TV Maze HTML markup; strip with stripHtml() before
+  // rendering.
   summary?: string | null
+  // Poster URL (the raw image's `medium`, falling back to `original`).
   image?: string | null
   rating?: number | null
   genres: string[]
