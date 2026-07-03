@@ -21,7 +21,8 @@
     "resultsCount": "{count} chương trình",
     "noResults": "Không có chương trình nào phù hợp với tìm kiếm của bạn.",
     "clearFilters": "Xóa bộ lọc",
-    "loadMore": "Tải thêm"
+    "loadMore": "Tải thêm",
+    "seasonsCount": "{count} phần"
   },
   "show": {
     "rating": "Đánh giá",

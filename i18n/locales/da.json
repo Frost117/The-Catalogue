@@ -21,7 +21,8 @@
     "resultsCount": "{count} serier",
     "noResults": "Ingen serier matcher din søgning.",
     "clearFilters": "Ryd filtre",
-    "loadMore": "Indlæs flere"
+    "loadMore": "Indlæs flere",
+    "seasonsCount": "{count} sæson | {count} sæsoner"
   },
   "show": {
     "rating": "Bedømmelse",

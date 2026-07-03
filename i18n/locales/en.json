@@ -21,7 +21,8 @@
     "resultsCount": "{count} shows",
     "noResults": "No shows match your search.",
     "clearFilters": "Clear filters",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "seasonsCount": "{count} season | {count} seasons"
   },
   "show": {
     "rating": "Rating",

@@ -1,0 +1,13 @@
+# Season count for a show, shown in the catalogue card popover. Episodes are
+# sibling nodes linked by the numeric tvShowId; TV Maze seasons are contiguous
+# from 1, so the highest season number equals the number of seasons. Fetch just
+# the top episode by season to keep it a single cheap request.
+query SeasonCount($where: NodeFilterInput!) {
+  tvshow_collection(first: 1, where: $where, orderBy: [{ episode: { season: DESC } }]) {
+    items {
+      ... on Episode {
+        season
+      }
+    }
+  }
+}
