@@ -1,0 +1,13 @@
+name = "the-catalogue"
+compatibility_date = "2025-01-15"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".output/public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "the-catalogue"
+# Placeholder — run `wrangler login` then `wrangler d1 create the-catalogue`
+# and paste the real id here before deploying or running migrations against
+# remote D1. Local dev (`--local`) works against this placeholder.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "server/database/migrations"

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { loggedIn, logout } = useAuth()
+const authModalOpen = ref(false)
 
 // Locale-aware <html lang>, hreflang alternates and canonical for SEO.
 const head = useLocaleHead()
@@ -44,12 +46,30 @@ useSeoMeta({
       <template #right>
         <LocaleSwitcher />
         <UColorModeButton />
+        <UButton
+          v-if="!loggedIn"
+          variant="ghost"
+          :label="t('auth.login')"
+          @click="authModalOpen = true"
+        />
+        <UButton
+          v-else
+          variant="ghost"
+          :label="t('auth.logout')"
+          @click="logout()"
+        />
       </template>
     </UHeader>
 
     <UMain>
       <NuxtPage />
     </UMain>
+
+    <UModal v-model:open="authModalOpen">
+      <template #body>
+        <LoginSignupForm @close="authModalOpen = false" />
+      </template>
+    </UModal>
 
     <USeparator icon="i-lucide-tv" />
 

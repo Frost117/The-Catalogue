@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Cloudflare/wrangler local state (local D1 emulation, etc.)
+.wrangler
+
 # Node dependencies
 node_modules
 

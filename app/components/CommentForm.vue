@@ -1,0 +1,59 @@
+<script setup lang="ts">
+const props = defineProps<{ showId: string }>()
+const emit = defineEmits<{ posted: [] }>()
+
+const { t } = useI18n()
+const { post, posting, error } = usePostComment(() => props.showId)
+
+const rating = ref(0)
+const body = ref('')
+
+async function submit() {
+  const comment = await post(rating.value, body.value)
+  if (comment) {
+    rating.value = 0
+    body.value = ''
+    emit('posted')
+  }
+}
+</script>
+
+<template>
+  <form
+    class="flex flex-col gap-3"
+    @submit.prevent="submit"
+  >
+    <UAlert
+      v-if="error"
+      color="error"
+      variant="subtle"
+      :description="t('comments.postError')"
+    />
+
+    <div class="flex items-center gap-1">
+      <UIcon
+        v-for="n in 5"
+        :key="n"
+        name="i-lucide-star"
+        class="size-6 cursor-pointer"
+        :class="n <= rating ? 'text-primary' : 'text-muted'"
+        @click="rating = n"
+      />
+    </div>
+
+    <UTextarea
+      v-model="body"
+      :placeholder="t('comments.bodyPlaceholder')"
+      :maxlength="2000"
+      class="w-full"
+    />
+
+    <UButton
+      type="submit"
+      class="self-start"
+      :loading="posting"
+      :disabled="rating < 1 || !body.trim()"
+      :label="t('comments.submit')"
+    />
+  </form>
+</template>

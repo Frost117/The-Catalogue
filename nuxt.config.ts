@@ -3,7 +3,8 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
+    'nuxt-auth-utils'
     // 'nuxt-graphql-client' — still disabled, but no longer blocked. The
     // correct endpoint is now in GQL_HOST (/{project}/{environment}, no /v1)
     // and it introspects with a plain Bearer token, so build-time codegen can
@@ -33,8 +34,18 @@ export default defineNuxtConfig({
     // `graphql:introspection` return `invalid_scope` unless granted to the API
     // application in the Compose portal first, so only set them if needed.
     composeScope: process.env.COMPOSE_SCOPE || '',
+    // Collection alias (Compose -> CollectionAlias), scoping queries to this collection.
+    composeCollectionAlias: process.env.COMPOSE_COLLECTION_ALIAS || '',
     // Full Compose GraphQL URL, e.g. https://graphql.<region>.umbracocompose.com/<project>/<environment> (no /v1)
     composeGraphqlUrl: process.env.GQL_HOST || '',
+    // Twilio Verify — SMS OTP for phone login/signup. Server-only.
+    twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
+    twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
+    twilioVerifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || '',
+    // Umbraco Members API — not yet configured; server/utils/umbracoMembers.ts
+    // runs in stub mode (D1-only) until these are set.
+    umbracoMembersBaseUrl: process.env.UMBRACO_MEMBERS_BASE_URL || '',
+    umbracoMembersApiKey: process.env.UMBRACO_MEMBERS_API_KEY || '',
     public: {}
   },
 
@@ -47,6 +58,10 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-01-15',
+
+  nitro: {
+    preset: 'cloudflare_module'
+  },
 
   eslint: {
     config: {

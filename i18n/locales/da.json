@@ -48,5 +48,31 @@
     "next": "Næste",
     "page": "Side",
     "fallbackNotice": "Viser indhold på {language} — endnu ikke tilgængeligt på dit sprog."
+  },
+  "auth": {
+    "login": "Log ind",
+    "logout": "Log ud",
+    "signup": "Opret konto",
+    "switchToSignup": "Ny her? Opret konto",
+    "switchToLogin": "Har du allerede en konto? Log ind",
+    "phoneLabel": "Telefonnummer",
+    "phonePlaceholder": "+45 12 34 56 78",
+    "displayNameLabel": "Vist navn",
+    "codeLabel": "Bekræftelseskode",
+    "codeSentDescription": "Vi har sendt en kode til {phone}",
+    "sendCode": "Send kode",
+    "verify": "Bekræft",
+    "invalidPhone": "Indtast et gyldigt telefonnummer, inklusive landekode.",
+    "invalidCode": "Koden er ugyldig eller udløbet.",
+    "phoneAlreadyRegistered": "Dette telefonnummer er allerede registreret — log ind i stedet.",
+    "noAccount": "Ingen konto fundet for dette telefonnummer — opret en konto i stedet."
+  },
+  "comments": {
+    "title": "Kommentarer",
+    "empty": "Ingen kommentarer endnu — vær den første til at dele din mening.",
+    "loginPrompt": "Log ind for at skrive en kommentar og give en bedømmelse.",
+    "bodyPlaceholder": "Hvad tænkte du om den?",
+    "submit": "Send kommentar",
+    "postError": "Kunne ikke sende din kommentar. Prøv igen."
   }
 }

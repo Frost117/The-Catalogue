@@ -48,5 +48,31 @@
     "next": "Next",
     "page": "Page",
     "fallbackNotice": "Showing content in {language} — not yet available in your language."
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "signup": "Sign up",
+    "switchToSignup": "New here? Sign up",
+    "switchToLogin": "Already have an account? Log in",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "+45 12 34 56 78",
+    "displayNameLabel": "Display name",
+    "codeLabel": "Verification code",
+    "codeSentDescription": "We sent a code to {phone}",
+    "sendCode": "Send code",
+    "verify": "Verify",
+    "invalidPhone": "Enter a valid phone number, including country code.",
+    "invalidCode": "That code is invalid or has expired.",
+    "phoneAlreadyRegistered": "This phone number is already registered — try logging in instead.",
+    "noAccount": "No account found for this phone number — try signing up instead."
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comments yet — be the first to share your thoughts.",
+    "loginPrompt": "Log in to leave a comment and rating.",
+    "bodyPlaceholder": "What did you think?",
+    "submit": "Post comment",
+    "postError": "Couldn’t post your comment. Please try again."
   }
 }

@@ -48,5 +48,31 @@
     "next": "Tiếp",
     "page": "Trang",
     "fallbackNotice": "Đang hiển thị nội dung bằng {language} — chưa có bằng ngôn ngữ của bạn."
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "signup": "Đăng ký",
+    "switchToSignup": "Chưa có tài khoản? Đăng ký",
+    "switchToLogin": "Đã có tài khoản? Đăng nhập",
+    "phoneLabel": "Số điện thoại",
+    "phonePlaceholder": "+84 12 345 6789",
+    "displayNameLabel": "Tên hiển thị",
+    "codeLabel": "Mã xác nhận",
+    "codeSentDescription": "Chúng tôi đã gửi mã đến {phone}",
+    "sendCode": "Gửi mã",
+    "verify": "Xác nhận",
+    "invalidPhone": "Vui lòng nhập số điện thoại hợp lệ, bao gồm mã quốc gia.",
+    "invalidCode": "Mã không hợp lệ hoặc đã hết hạn.",
+    "phoneAlreadyRegistered": "Số điện thoại này đã được đăng ký — hãy đăng nhập.",
+    "noAccount": "Không tìm thấy tài khoản cho số điện thoại này — hãy đăng ký."
+  },
+  "comments": {
+    "title": "Bình luận",
+    "empty": "Chưa có bình luận nào — hãy là người đầu tiên chia sẻ cảm nhận của bạn.",
+    "loginPrompt": "Đăng nhập để bình luận và đánh giá.",
+    "bodyPlaceholder": "Bạn nghĩ gì về chương trình này?",
+    "submit": "Đăng bình luận",
+    "postError": "Không thể đăng bình luận của bạn. Vui lòng thử lại."
   }
 }
