@@ -3,16 +3,10 @@ const props = defineProps<{ showId: string }>()
 const emit = defineEmits<{ posted: [] }>()
 
 const { t } = useI18n()
-const { post, posting, error } = usePostComment(() => props.showId)
+const { rating, body, posting, error, submit } = useCommentForm(() => props.showId)
 
-const rating = ref(0)
-const body = ref('')
-
-async function submit() {
-  const comment = await post(rating.value, body.value)
-  if (comment) {
-    rating.value = 0
-    body.value = ''
+async function handleSubmit() {
+  if (await submit()) {
     emit('posted')
   }
 }
@@ -21,7 +15,7 @@ async function submit() {
 <template>
   <form
     class="flex flex-col gap-3"
-    @submit.prevent="submit"
+    @submit.prevent="handleSubmit"
   >
     <UAlert
       v-if="error"
