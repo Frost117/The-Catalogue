@@ -12,6 +12,8 @@ const {
   genre,
   genreSelection,
   genreItems,
+  sortBy,
+  sortDir,
   hasFilters,
   clearFilters
 } = useCatalogueFilters(() => genres.value)
@@ -27,7 +29,9 @@ const {
 } = useShowsQuery(() => ({
   locale: locale.value,
   search: search.value,
-  genre: genre.value
+  genre: genre.value,
+  sortBy: sortBy.value,
+  sortDir: sortDir.value
 }))
 
 const pending = computed(() => status.value === 'pending')

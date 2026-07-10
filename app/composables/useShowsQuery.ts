@@ -1,6 +1,7 @@
 import showsQuery from '~/graphql/shows.gql?raw'
 import { gqlRequest } from '~/utils/gqlRequest'
 import { mapShowSummary } from '~/utils/mapShow'
+import type { SortField, SortDirection } from '~/composables/useCatalogueFilters'
 import type { ShowSummary } from '~/types/show'
 import type { RawNodeConnection, RawShow } from '~/types/compose'
 
@@ -12,6 +13,8 @@ export interface CatalogueFilters {
   locale: string
   search: string
   genre: string
+  sortBy: SortField
+  sortDir: SortDirection
 }
 
 interface CataloguePage {
@@ -34,8 +37,33 @@ function buildWhere(filters: CatalogueFilters) {
   return { show }
 }
 
+// Translate sortBy/sortDir into the inline `orderBy` literal substituted into
+// shows.gql (see the placeholder note there). title/release sort on plain
+// scalar fields, matching the one other confirmed orderBy example in this
+// schema (`season` in seasonCount.gql). The nested `rating: { average }`
+// shape is the one part of this unconfirmed against the live schema.
+function buildOrderByLiteral(filters: CatalogueFilters): string {
+  const dir: 'ASC' | 'DESC' = filters.sortDir === 'asc' ? 'ASC' : 'DESC'
+  switch (filters.sortBy) {
+    case 'rating':
+      return `[{ show: { rating: { average: ${dir} } } }]`
+    case 'release':
+      return `[{ show: { premiered: ${dir} } }]`
+    case 'title':
+    default:
+      return `[{ show: { name: ${dir} } }]`
+  }
+}
+
 async function fetchPage(filters: CatalogueFilters, after: string | null): Promise<CataloguePage> {
-  const res = await gqlRequest<{ tvshow_collection: RawNodeConnection<RawShow> }>(showsQuery, {
+  // Substitute only the real `orderBy: __ORDER_BY__` clause in the query body
+  // — matching the bare `__ORDER_BY__` token would instead hit its first
+  // mention in the file's leading doc comment (which documents the
+  // placeholder using that same literal text) and leave the actual clause
+  // untouched, since String.replace() with a plain string only replaces the
+  // first occurrence.
+  const query = showsQuery.replace('orderBy: __ORDER_BY__', `orderBy: ${buildOrderByLiteral(filters)}`)
+  const res = await gqlRequest<{ tvshow_collection: RawNodeConnection<RawShow> }>(query, {
     where: buildWhere(filters),
     first: CATALOGUE_PAGE_SIZE,
     after
@@ -52,8 +80,8 @@ async function fetchPage(filters: CatalogueFilters, after: string | null): Promi
 
 // Paginated catalogue with a "load more" affordance. The first page is fetched
 // via useAsyncData (so it renders during SSR and re-runs when the reactive
-// search/genre/locale state changes); subsequent pages are appended on the
-// client.
+// search/genre/sort/locale state changes); subsequent pages are appended on
+// the client.
 export function useShowsQuery(filters: () => CatalogueFilters) {
   const { data, status, error, refresh } = useAsyncData(
     'catalogue',

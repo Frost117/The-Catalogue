@@ -1,5 +1,5 @@
 # Catalogue query — cursor-paginated Show list with optional search + genre
-# filter, alphabetised by title.
+# filter, sorted by the `orderBy` clause below.
 #
 # The `where` filter is built in the composable (~/composables/useShowsQuery)
 # and passed as a NodeFilterInput variable, so optional filters can be omitted
@@ -7,12 +7,19 @@
 # There is no totalCount on this endpoint, so pagination is cursor-based
 # (pageInfo) and the UI uses a "load more" affordance. Fields are flat on Show
 # now (no `properties`); `summary` is localized inline ({ en, da, vi }).
+#
+# `orderBy` below is a literal `__ORDER_BY__` placeholder, not a GraphQL
+# variable: there's no schema introspection artifact in this repo, so the
+# real `orderBy` input type name is unconfirmed, whereas an inline literal
+# (as used here and in seasonCount.gql) needs no declared type name.
+# useShowsQuery's buildOrderByLiteral() substitutes the real literal text
+# into this placeholder before the request is sent.
 query Shows($where: NodeFilterInput!, $first: Int!, $after: String) {
   tvshow_collection(
     first: $first
     after: $after
     where: $where
-    orderBy: [{ show: { name: ASC } }]
+    orderBy: __ORDER_BY__
   ) {
     items {
       ... on Show {
