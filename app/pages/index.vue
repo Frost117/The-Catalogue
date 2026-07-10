@@ -1,60 +1,20 @@
 <script setup lang="ts">
 import { useShowsQuery } from '~/composables/useShowsQuery'
 import { useGenresQuery } from '~/composables/useGenresQuery'
+import { useCatalogueFilters } from '~/composables/useCatalogueFilters'
 
 const { t, locale } = useI18n()
-const route = useRoute()
-const router = useRouter()
-
-function firstQuery(value: unknown): string {
-  if (Array.isArray(value)) {
-    return (value[0] as string) ?? ''
-  }
-  return (value as string) ?? ''
-}
-
-const searchInput = ref(firstQuery(route.query.q))
-const search = ref(searchInput.value)
-const genre = ref(firstQuery(route.query.genre))
-
-// Debounce typing into a committed search term.
-let debounceTimer: ReturnType<typeof setTimeout> | undefined
-watch(searchInput, (value) => {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    search.value = value
-  }, 350)
-})
-
-// Keep filter state in the URL so results are shareable + SSR-able.
-watch([search, genre], () => {
-  router.replace({
-    query: {
-      ...(search.value ? { q: search.value } : {}),
-      ...(genre.value ? { genre: genre.value } : {})
-    }
-  })
-})
 
 const { data: genres } = useGenresQuery()
-
-// Reka UI's Select reserves the empty string for the cleared/placeholder
-// state, so the "all genres" item needs a non-empty sentinel value. `genre`
-// stays the source of truth ('' = no filter) for the query/URL logic above;
-// this proxy maps the sentinel <-> '' only at the Select boundary.
-const ALL_GENRES = '__all__'
-
-const genreSelection = computed({
-  get: () => genre.value || ALL_GENRES,
-  set: (value: string) => {
-    genre.value = value === ALL_GENRES ? '' : value
-  }
-})
-
-const genreItems = computed(() => [
-  { label: t('catalogue.allGenres'), value: ALL_GENRES },
-  ...(genres.value ?? []).map(g => ({ label: g, value: g }))
-])
+const {
+  searchInput,
+  search,
+  genre,
+  genreSelection,
+  genreItems,
+  hasFilters,
+  clearFilters
+} = useCatalogueFilters(() => genres.value)
 
 const {
   items: shows,
@@ -71,13 +31,6 @@ const {
 }))
 
 const pending = computed(() => status.value === 'pending')
-const hasFilters = computed(() => !!search.value || !!genre.value)
-
-function clearFilters() {
-  searchInput.value = ''
-  search.value = ''
-  genre.value = ''
-}
 
 useSeoMeta({
   title: () => t('catalogue.title'),
