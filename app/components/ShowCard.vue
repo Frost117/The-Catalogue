@@ -21,14 +21,10 @@ const hasLongSummary = computed(() => fullSummary.value.length > SUMMARY_POPOVER
 // Season count isn't part of the catalogue data; fetch it lazily the first time
 // the popover opens (never on page load), cached per show by the composable key.
 const tvShowId = computed(() => showNumericId(props.show.id))
-const { data: seasons, status: seasonsStatus, execute: loadSeasons } = useSeasonCount(tvShowId.value ?? -1)
+const { data: seasons, status: seasonsStatus, ensureLoaded } = useSeasonCount(tvShowId.value ?? -1)
 
-let seasonsRequested = false
 function onOpen(open: boolean) {
-  if (open && !seasonsRequested && tvShowId.value != null) {
-    seasonsRequested = true
-    loadSeasons()
-  }
+  if (open) ensureLoaded()
 }
 </script>
 

@@ -8,7 +8,9 @@ import type { RawNodeConnection, RawEpisode } from '~/types/compose'
 // (immediate: false) — the catalogue popover calls execute() on first open — and
 // cached per show by the useAsyncData key.
 export function useSeasonCount(tvShowId: number) {
-  return useAsyncData<number | null>(
+  const seasonsRequested = ref(false)
+
+  const result = useAsyncData<number | null>(
     `seasons:${tvShowId}`,
     async () => {
       const res = await gqlRequest<{ tvshow_collection: RawNodeConnection<RawEpisode> }>(
@@ -21,4 +23,13 @@ export function useSeasonCount(tvShowId: number) {
     },
     { immediate: false, default: () => null }
   )
+
+  function ensureLoaded() {
+    if (!seasonsRequested.value && tvShowId >= 0) {
+      seasonsRequested.value = true
+      result.execute()
+    }
+  }
+
+  return { ...result, ensureLoaded }
 }
