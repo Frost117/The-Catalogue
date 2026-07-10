@@ -14,6 +14,9 @@ const {
   genreItems,
   sortBy,
   sortDir,
+  sortBySelection,
+  sortFieldItems,
+  toggleSortDir,
   hasFilters,
   clearFilters
 } = useCatalogueFilters(() => genres.value)
@@ -35,6 +38,13 @@ const {
 }))
 
 const pending = computed(() => status.value === 'pending')
+
+const sortDirIcon = computed(() =>
+  sortDir.value === 'asc' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'
+)
+const sortDirLabel = computed(() =>
+  sortDir.value === 'asc' ? t('catalogue.sortDirection.ascLabel') : t('catalogue.sortDirection.descLabel')
+)
 
 useSeoMeta({
   title: () => t('catalogue.title'),
@@ -62,6 +72,20 @@ useSeoMeta({
           value-key="value"
           :aria-label="t('catalogue.genreLabel')"
           class="sm:w-48"
+        />
+        <USelect
+          v-model="sortBySelection"
+          :items="sortFieldItems"
+          value-key="value"
+          :aria-label="t('catalogue.sortLabel')"
+          class="sm:w-44"
+        />
+        <UButton
+          color="neutral"
+          variant="ghost"
+          :icon="sortDirIcon"
+          :aria-label="sortDirLabel"
+          @click="toggleSortDir"
         />
         <UButton
           v-if="hasFilters"
