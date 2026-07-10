@@ -5,8 +5,9 @@ import type { RawNodeConnection, RawEpisode } from '~/types/compose'
 // Number of seasons for a show. Episodes are separate nodes linked by numeric
 // tvShowId; TV Maze seasons are contiguous from 1, so the highest season number
 // is the count. Not part of the catalogue payload, so this is fetched lazily
-// (immediate: false) — the catalogue popover calls execute() on first open — and
-// cached per show by the useAsyncData key.
+// (immediate: false) — the catalogue popover calls ensureLoaded() on first open,
+// which guards against repeat fetches and runs execute() once — and cached per
+// show by the useAsyncData key.
 export function useSeasonCount(tvShowId: number) {
   const seasonsRequested = ref(false)
 
