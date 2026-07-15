@@ -62,20 +62,16 @@
   "auth": {
     "login": "Log in",
     "logout": "Log out",
-    "signup": "Sign up",
-    "switchToSignup": "New here? Sign up",
-    "switchToLogin": "Already have an account? Log in",
+    "callingCodeLabel": "Country code",
     "phoneLabel": "Phone number",
-    "phonePlaceholder": "+45 12 34 56 78",
-    "displayNameLabel": "Display name",
+    "phonePlaceholder": "20 12 34 56",
     "codeLabel": "Verification code",
     "codeSentDescription": "We sent a code to {phone}",
     "sendCode": "Send code",
     "verify": "Verify",
-    "invalidPhone": "Enter a valid phone number, including country code.",
+    "invalidPhone": "Enter a valid phone number.",
     "invalidCode": "That code is invalid or has expired.",
-    "phoneAlreadyRegistered": "This phone number is already registered — try logging in instead.",
-    "noAccount": "No account found for this phone number — try signing up instead."
+    "requestFailed": "Something went wrong. Please try again."
   },
   "comments": {
     "title": "Comments",

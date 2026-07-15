@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     id: crypto.randomUUID(),
     showId,
     userId: session.user.id,
-    authorDisplayName: session.user.displayName,
+    authorDisplayName: session.user.username,
     rating: body.rating,
     body: text,
     createdAt: Math.floor(Date.now() / 1000)

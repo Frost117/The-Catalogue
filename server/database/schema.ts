@@ -4,6 +4,9 @@ import { sql } from 'drizzle-orm'
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(), // crypto.randomUUID(), generated app-side
   phone: text('phone').notNull().unique(), // E.164, e.g. +4512345678
+  // The login-only OTP flow collects no display name, so this is set to the
+  // phone on first login. Kept NOT NULL to avoid a migration; the session/
+  // profile `username` is what the UI reads.
   displayName: text('display_name').notNull(),
   // Umbraco Members id — nullable until the real adapter is implemented.
   // See server/utils/umbracoMembers.ts.

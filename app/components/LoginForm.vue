@@ -1,25 +1,27 @@
 <script setup lang="ts">
+import { CALLING_CODES } from '~/utils/callingCodes'
+
 const { t } = useI18n()
 const emit = defineEmits<{ close: [] }>()
 
 const {
-  mode,
   step,
   phone,
-  displayName,
+  callingCode,
   code,
   loading,
   errorMessage,
-  toggleMode,
   submitPhoneStep,
   submitCodeStep
 } = useAuthForm(() => emit('close'))
+
+const callingCodeItems = CALLING_CODES.map(c => ({ label: c.label, value: c.code }))
 </script>
 
 <template>
   <div class="flex flex-col gap-4 p-4">
     <h2 class="text-lg font-semibold text-highlighted">
-      {{ mode === 'signup' ? t('auth.signup') : t('auth.login') }}
+      {{ t('auth.login') }}
     </h2>
 
     <UAlert
@@ -34,38 +36,34 @@ const {
       class="flex flex-col gap-3"
       @submit.prevent="submitPhoneStep"
     >
-      <UFormField :label="t('auth.phoneLabel')">
-        <UInput
-          v-model="phone"
-          type="tel"
-          :placeholder="t('auth.phonePlaceholder')"
-          class="w-full"
-        />
-      </UFormField>
-
-      <UFormField
-        v-if="mode === 'signup'"
-        :label="t('auth.displayNameLabel')"
-      >
-        <UInput
-          v-model="displayName"
-          class="w-full"
-        />
-      </UFormField>
+      <div class="flex items-end gap-2">
+        <UFormField :label="t('auth.callingCodeLabel')">
+          <USelect
+            v-model="callingCode"
+            :items="callingCodeItems"
+            class="w-28"
+          />
+        </UFormField>
+        <UFormField
+          :label="t('auth.phoneLabel')"
+          class="flex-1"
+        >
+          <UInput
+            v-model="phone"
+            type="tel"
+            inputmode="numeric"
+            :placeholder="t('auth.phonePlaceholder')"
+            class="w-full"
+          />
+        </UFormField>
+      </div>
 
       <UButton
         type="submit"
         block
         :loading="loading"
-        :disabled="!phone || (mode === 'signup' && !displayName.trim())"
+        :disabled="!phone"
         :label="t('auth.sendCode')"
-      />
-
-      <UButton
-        variant="link"
-        color="neutral"
-        :label="mode === 'signup' ? t('auth.switchToLogin') : t('auth.switchToSignup')"
-        @click="toggleMode"
       />
     </form>
 
@@ -75,12 +73,13 @@ const {
       @submit.prevent="submitCodeStep"
     >
       <p class="text-sm text-muted">
-        {{ t('auth.codeSentDescription', { phone }) }}
+        {{ t('auth.codeSentDescription', { phone: `+${callingCode} ${phone}` }) }}
       </p>
 
       <UFormField :label="t('auth.codeLabel')">
         <UInput
           v-model="code"
+          inputmode="numeric"
           class="w-full"
         />
       </UFormField>

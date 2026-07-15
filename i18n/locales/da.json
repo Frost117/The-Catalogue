@@ -62,20 +62,16 @@
   "auth": {
     "login": "Log ind",
     "logout": "Log ud",
-    "signup": "Opret konto",
-    "switchToSignup": "Ny her? Opret konto",
-    "switchToLogin": "Har du allerede en konto? Log ind",
+    "callingCodeLabel": "Landekode",
     "phoneLabel": "Telefonnummer",
-    "phonePlaceholder": "+45 12 34 56 78",
-    "displayNameLabel": "Vist navn",
+    "phonePlaceholder": "20 12 34 56",
     "codeLabel": "Bekræftelseskode",
     "codeSentDescription": "Vi har sendt en kode til {phone}",
     "sendCode": "Send kode",
     "verify": "Bekræft",
-    "invalidPhone": "Indtast et gyldigt telefonnummer, inklusive landekode.",
+    "invalidPhone": "Indtast et gyldigt telefonnummer.",
     "invalidCode": "Koden er ugyldig eller udløbet.",
-    "phoneAlreadyRegistered": "Dette telefonnummer er allerede registreret — log ind i stedet.",
-    "noAccount": "Ingen konto fundet for dette telefonnummer — opret en konto i stedet."
+    "requestFailed": "Noget gik galt. Prøv venligst igen."
   },
   "comments": {
     "title": "Kommentarer",

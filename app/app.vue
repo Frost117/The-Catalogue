@@ -67,7 +67,7 @@ useSeoMeta({
 
     <UModal v-model:open="authModalOpen">
       <template #body>
-        <LoginSignupForm @close="authModalOpen = false" />
+        <LoginForm @close="authModalOpen = false" />
       </template>
     </UModal>
 
