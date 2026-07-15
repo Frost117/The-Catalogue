@@ -15,7 +15,13 @@ const {
   submitCodeStep
 } = useAuthForm(() => emit('close'))
 
-const callingCodeItems = CALLING_CODES.map(c => ({ label: c.label, value: c.code }))
+// `name` is included so the searchable select filters on the country name too
+// (see filter-fields below); the compact label keeps the trigger tidy.
+const callingCodeItems = CALLING_CODES.map(c => ({
+  label: `${c.flag} +${c.code}`,
+  value: c.code,
+  name: c.name
+}))
 </script>
 
 <template>
@@ -38,10 +44,12 @@ const callingCodeItems = CALLING_CODES.map(c => ({ label: c.label, value: c.code
     >
       <div class="flex items-end gap-2">
         <UFormField :label="t('auth.callingCodeLabel')">
-          <USelect
+          <USelectMenu
             v-model="callingCode"
             :items="callingCodeItems"
-            class="w-28"
+            value-key="value"
+            :filter-fields="['label', 'name']"
+            class="w-40"
           />
         </UFormField>
         <UFormField

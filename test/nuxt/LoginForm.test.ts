@@ -26,7 +26,7 @@ function makeForm() {
 const stubs = {
   UAlert: defineComponent({ props: ['description'], template: '<div class="alert">{{ description }}</div>' }),
   UFormField: defineComponent({ props: ['label'], template: '<label>{{ label }}<slot /></label>' }),
-  USelect: defineComponent({ props: ['modelValue', 'items'], template: '<select class="calling-code" />' }),
+  USelectMenu: defineComponent({ props: ['modelValue', 'items', 'valueKey', 'filterFields'], template: '<div class="calling-code" />' }),
   UInput: defineComponent({ props: ['modelValue'], template: '<input />' }),
   UButton: defineComponent({ props: ['label', 'loading', 'disabled'], template: '<button>{{ label }}</button>' })
 }
