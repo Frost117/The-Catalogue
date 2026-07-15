@@ -14,25 +14,25 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.114",
-    "@iconify-json/simple-icons": "^1.2.86",
+    "@iconify-json/lucide": "^1.2.117",
+    "@iconify-json/simple-icons": "^1.2.90",
     "@nuxt/ui": "^4.9.0",
-    "@nuxtjs/i18n": "^10.4.0",
+    "@nuxtjs/i18n": "^10.4.1",
     "nuxt": "^4.4.8",
     "nuxt-graphql-client": "^0.2.46",
-    "tailwindcss": "^4.3.1"
+    "tailwindcss": "^4.3.2"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
     "@vitest/coverage-v8": "^4.1.10",
     "@vue/test-utils": "^2.4.11",
-    "eslint": "^10.5.0",
+    "eslint": "^10.7.0",
     "happy-dom": "^20.10.6",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
-    "vue-tsc": "^3.3.5",
-    "wrangler": "^4.107.0"
+    "vue-tsc": "^3.3.7",
+    "wrangler": "^4.110.0"
   },
-  "packageManager": "pnpm@11.8.0"
+  "packageManager": "pnpm@11.13.0"
 }
