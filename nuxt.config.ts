@@ -3,8 +3,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
-    '@nuxtjs/i18n',
-    'nuxt-auth-utils'
+    '@nuxtjs/i18n'
     // 'nuxt-graphql-client' — still disabled, but no longer blocked. The
     // correct endpoint is now in GQL_HOST (/{project}/{environment}, no /v1)
     // and it introspects with a plain Bearer token, so build-time codegen can
@@ -38,14 +37,9 @@ export default defineNuxtConfig({
     composeCollectionAlias: process.env.COMPOSE_COLLECTION_ALIAS || '',
     // Full Compose GraphQL URL, e.g. https://graphql.<region>.umbracocompose.com/<project>/<environment> (no /v1)
     composeGraphqlUrl: process.env.GQL_HOST || '',
-    // Twilio Verify — SMS OTP for phone login/signup. Server-only.
-    twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
-    twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
-    twilioVerifyServiceSid: process.env.TWILIO_VERIFY_SERVICE_SID || '',
-    // Umbraco Members API — not yet configured; server/utils/umbracoMembers.ts
-    // runs in stub mode (D1-only) until these are set.
-    umbracoMembersBaseUrl: process.env.UMBRACO_MEMBERS_BASE_URL || '',
-    umbracoMembersApiKey: process.env.UMBRACO_MEMBERS_API_KEY || '',
+    // Umbraco member-login backend. All /api/auth/* requests are proxied here
+    // (server/api/auth/[...].ts); it owns the OTP flow and the session cookie.
+    memberLoginHost: process.env.MEMBER_LOGIN_HOST || '',
     public: {}
   },
 

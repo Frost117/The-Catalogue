@@ -13,9 +13,6 @@ const { data, status, error, refresh } = await useShowQuery(
   () => locale.value
 )
 
-const { loggedIn } = useAuth()
-const authModalOpen = ref(false)
-
 const show = computed(() => data.value?.show ?? null)
 const summaryLang = computed(() => data.value?.summaryLang ?? null)
 
@@ -40,8 +37,6 @@ const fallbackLanguage = computed(() =>
     ? t(`locale.${summaryLang.value}`)
     : null
 )
-
-const { data: comments, refresh: refreshComments } = useCommentsQuery(() => show.value?.id ?? '')
 
 useSeoMeta({
   title: () => show.value?.title ?? t('show.notFound'),
@@ -249,36 +244,6 @@ useSeoMeta({
           </div>
         </div>
       </section>
-
-      <!-- Comments -->
-      <section class="mt-10">
-        <h2 class="mb-4 text-xl font-semibold text-highlighted">
-          {{ t('comments.title') }}
-        </h2>
-
-        <CommentForm
-          v-if="loggedIn"
-          :show-id="show.id"
-          class="mb-6"
-          @posted="refreshComments()"
-        />
-        <UAlert
-          v-else
-          color="neutral"
-          variant="subtle"
-          class="mb-6"
-          :description="t('comments.loginPrompt')"
-          :actions="[{ label: t('auth.login'), onClick: () => { authModalOpen = true } }]"
-        />
-
-        <CommentList :comments="comments ?? []" />
-      </section>
     </template>
-
-    <UModal v-model:open="authModalOpen">
-      <template #body>
-        <LoginForm @close="authModalOpen = false" />
-      </template>
-    </UModal>
   </UContainer>
 </template>
