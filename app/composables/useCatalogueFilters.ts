@@ -1,4 +1,5 @@
-function firstQuery(value: unknown): string {
+// Exported for direct unit testing; pure and side-effect-free.
+export function firstQuery(value: unknown): string {
   if (Array.isArray(value)) {
     return (value[0] as string) ?? ''
   }
@@ -11,19 +12,19 @@ export type SortField = 'title' | 'rating' | 'release'
 export type SortDirection = 'asc' | 'desc'
 
 const SORT_FIELDS: SortField[] = ['title', 'rating', 'release']
-const DEFAULT_SORT_FIELD: SortField = 'title'
-const DEFAULT_SORT_DIR: Record<SortField, SortDirection> = {
+export const DEFAULT_SORT_FIELD: SortField = 'title'
+export const DEFAULT_SORT_DIR: Record<SortField, SortDirection> = {
   title: 'asc',
   rating: 'desc',
   release: 'desc'
 }
 
-function parseSortBy(value: unknown): SortField {
+export function parseSortBy(value: unknown): SortField {
   const raw = firstQuery(value)
   return (SORT_FIELDS as string[]).includes(raw) ? (raw as SortField) : DEFAULT_SORT_FIELD
 }
 
-function parseSortDir(value: unknown, sortBy: SortField): SortDirection {
+export function parseSortDir(value: unknown, sortBy: SortField): SortDirection {
   const raw = firstQuery(value)
   return raw === 'asc' || raw === 'desc' ? raw : DEFAULT_SORT_DIR[sortBy]
 }

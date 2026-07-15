@@ -26,7 +26,7 @@ interface CataloguePage {
 // Translate filters into the Compose `where` input. Optional filters are only
 // included when set, so we never send `name_contains: null` or `genres_some:
 // [null]`.
-function buildWhere(filters: CatalogueFilters) {
+export function buildWhere(filters: CatalogueFilters) {
   const show: Record<string, unknown> = {}
   if (filters.search) {
     show.name_contains = filters.search
@@ -42,7 +42,7 @@ function buildWhere(filters: CatalogueFilters) {
 // scalar fields, matching the one other confirmed orderBy example in this
 // schema (`season` in seasonCount.gql). The nested `rating: { average }`
 // shape is the one part of this unconfirmed against the live schema.
-function buildOrderByLiteral(filters: CatalogueFilters): string {
+export function buildOrderByLiteral(filters: CatalogueFilters): string {
   const dir: 'ASC' | 'DESC' = filters.sortDir === 'asc' ? 'ASC' : 'DESC'
   switch (filters.sortBy) {
     case 'rating':
