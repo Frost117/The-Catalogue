@@ -76,9 +76,12 @@
   "comments": {
     "title": "Kommentarer",
     "empty": "Ingen kommentarer endnu — vær den første til at dele din mening.",
-    "loginPrompt": "Log ind for at skrive en kommentar og give en bedømmelse.",
+    "loginPrompt": "Log ind for at skrive en kommentar.",
     "bodyPlaceholder": "Hvad tænkte du om den?",
     "submit": "Send kommentar",
-    "postError": "Kunne ikke sende din kommentar. Prøv igen."
+    "posting": "Sender…",
+    "postError": "Kunne ikke sende din kommentar. Prøv igen.",
+    "count": "{count} kommentar | {count} kommentarer",
+    "jump": "Gå til kommentarer"
   }
 }

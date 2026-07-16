@@ -13,6 +13,7 @@ const localePath = useLocalePath()
 const to = computed(() => localePath({ name: 'shows-slug', params: { slug: props.show.slug } }))
 const rating = computed(() => formatRating(props.show.rating))
 const summary = computed(() => stripHtml(props.show.summary))
+const commentCount = computed(() => props.show.commentCount ?? 0)
 </script>
 
 <template>
@@ -22,8 +23,8 @@ const summary = computed(() => stripHtml(props.show.summary))
     class="group block h-full"
   >
     <UCard
-      class="h-full overflow-hidden transition-shadow hover:shadow-lg"
-      :ui="{ body: 'flex flex-col gap-2', header: 'p-0 sm:p-0' }"
+      class="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lg"
+      :ui="{ body: 'flex flex-1 flex-col gap-2', header: 'p-0 sm:p-0', footer: 'px-4 py-2.5 sm:px-4' }"
     >
       <template #header>
         <div class="aspect-2/3 w-full overflow-hidden bg-elevated">
@@ -86,6 +87,19 @@ const summary = computed(() => stripHtml(props.show.summary))
       >
         {{ summary }}
       </p>
+
+      <template #footer>
+        <div
+          class="flex items-center gap-1.5 text-sm text-muted"
+          :aria-label="t('comments.count', { count: commentCount }, commentCount)"
+        >
+          <UIcon
+            name="i-lucide-message-circle"
+            class="size-4"
+          />
+          <span>{{ commentCount }}</span>
+        </div>
+      </template>
     </UCard>
   </ULink>
 </template>

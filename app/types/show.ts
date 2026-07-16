@@ -33,6 +33,21 @@ export interface ShowSummary {
   image?: string | null
   rating?: number | null
   genres: string[]
+  // Number of comments on this show, shown in the catalogue card footer.
+  // Populated from Compose once the comments read lands (null until then).
+  commentCount?: number | null
+}
+
+export interface Comment {
+  id: string
+  // TV Maze numeric show id the comment belongs to.
+  showId: number
+  // Display name of the author. The phone-OTP login has no display name, so
+  // this is the member's E.164 phone (AuthUser.username).
+  author: string
+  body: string
+  // ISO 8601 timestamp.
+  createdAt: string
 }
 
 export interface Show extends ShowSummary {

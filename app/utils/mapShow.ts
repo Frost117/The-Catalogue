@@ -72,7 +72,8 @@ export function mapShowSummary(raw: RawShow, locale: string): ShowSummary {
     summary: resolveLocalized(raw.summary, locale).text,
     image: raw.image?.medium ?? raw.image?.original ?? null,
     rating: toNum(raw.rating?.average),
-    genres: (raw.genres ?? []).filter((g): g is string => !!g)
+    genres: (raw.genres ?? []).filter((g): g is string => !!g),
+    commentCount: toNum(raw.commentCount)
   }
 }
 

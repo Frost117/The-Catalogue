@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useShowQuery } from '~/composables/useShowQuery'
+import { useShowComments } from '~/composables/useShowComments'
 import { formatRating, formatYear, groupEpisodesBySeason, stripHtml } from '~/utils/showHelpers'
+import { showNumericId } from '~/utils/mapShow'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -29,6 +31,33 @@ const rating = computed(() => formatRating(show.value?.rating))
 const summary = computed(() => stripHtml(show.value?.summary))
 const year = computed(() => formatYear(show.value?.premiered))
 const seasons = computed(() => groupEpisodesBySeason(show.value?.episodes ?? []))
+
+// Seasons as accordion items (all collapsed by default — no defaultValue). Extra
+// `season`/`episodes` keys ride along via AccordionItem's index signature and
+// come back typed in the #body slot.
+const seasonItems = computed(() =>
+  seasons.value.map(group => ({
+    label: t('show.season', { number: group.season }),
+    value: String(group.season),
+    season: group.season,
+    episodes: group.episodes
+  }))
+)
+
+// Comments — the section's state and behaviour all live in the composable.
+// Keyed by the show's TV Maze numeric id.
+const showId = computed(() => (show.value ? showNumericId(show.value.id) : null))
+const {
+  comments,
+  count: commentCount,
+  loggedIn,
+  commentBody,
+  posting,
+  postError,
+  submitComment,
+  formatCommentDate,
+  scrollToComments
+} = useShowComments(() => showId.value)
 
 // The summary was served in a different language than requested (only summaries
 // are localized in this schema; the fallback notice reflects that).
@@ -167,6 +196,17 @@ useSeoMeta({
         </div>
       </div>
 
+      <!-- Jump to comments -->
+      <div class="mt-6">
+        <UButton
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-message-circle"
+          :label="commentCount ? `${t('comments.jump')} (${commentCount})` : t('comments.jump')"
+          @click="scrollToComments"
+        />
+      </div>
+
       <!-- Cast -->
       <section class="mt-10">
         <h2 class="mb-4 text-xl font-semibold text-highlighted">
@@ -218,31 +258,101 @@ useSeoMeta({
         >
           {{ t('show.noEpisodes') }}
         </p>
-        <div
+        <UAccordion
           v-else
-          class="flex flex-col gap-6"
+          :items="seasonItems"
+          :ui="{ body: 'p-0' }"
         >
-          <div
-            v-for="group in seasons"
-            :key="group.season"
-          >
-            <h3 class="mb-2 font-semibold text-toned">
-              {{ t('show.season', { number: group.season }) }}
-            </h3>
-            <ul class="divide-y divide-default rounded-md border border-default">
+          <template #body="{ item }">
+            <ul class="divide-y divide-default border-t border-default">
               <li
-                v-for="ep in group.episodes"
+                v-for="ep in item.episodes"
                 :key="ep.id"
                 class="flex items-baseline gap-3 px-4 py-2.5"
               >
                 <span class="w-10 shrink-0 text-sm font-medium text-muted">
-                  {{ group.season }}×{{ String(ep.number).padStart(2, '0') }}
+                  {{ item.season }}×{{ String(ep.number).padStart(2, '0') }}
                 </span>
                 <span class="text-toned">{{ ep.name }}</span>
               </li>
             </ul>
+          </template>
+        </UAccordion>
+      </section>
+
+      <!-- Comments -->
+      <section
+        id="comments"
+        class="mt-10 scroll-mt-6"
+      >
+        <h2 class="mb-4 text-xl font-semibold text-highlighted">
+          {{ t('comments.title') }}
+          <span class="font-normal text-muted">({{ commentCount }})</span>
+        </h2>
+
+        <!-- Post form when logged in, otherwise a prompt to log in -->
+        <form
+          v-if="loggedIn"
+          class="mb-6 flex flex-col gap-3"
+          @submit.prevent="submitComment"
+        >
+          <UTextarea
+            v-model="commentBody"
+            :rows="3"
+            autoresize
+            :placeholder="t('comments.bodyPlaceholder')"
+          />
+          <UAlert
+            v-if="postError"
+            color="error"
+            variant="subtle"
+            icon="i-lucide-triangle-alert"
+            :description="t('comments.postError')"
+          />
+          <div>
+            <UButton
+              type="submit"
+              color="primary"
+              :loading="posting"
+              :disabled="!commentBody.trim()"
+              :label="posting ? t('comments.posting') : t('comments.submit')"
+            />
           </div>
-        </div>
+        </form>
+        <UAlert
+          v-else
+          color="neutral"
+          variant="subtle"
+          icon="i-lucide-lock"
+          class="mb-6"
+          :description="t('comments.loginPrompt')"
+        />
+
+        <!-- List -->
+        <p
+          v-if="!comments.length"
+          class="text-muted"
+        >
+          {{ t('comments.empty') }}
+        </p>
+        <ul
+          v-else
+          class="flex flex-col gap-4"
+        >
+          <li
+            v-for="comment in comments"
+            :key="comment.id"
+            class="rounded-md border border-default p-4"
+          >
+            <div class="mb-1 flex items-center justify-between gap-2 text-sm">
+              <span class="font-medium text-highlighted">{{ comment.author }}</span>
+              <span class="text-muted">{{ formatCommentDate(comment.createdAt) }}</span>
+            </div>
+            <p class="whitespace-pre-wrap text-toned">
+              {{ comment.body }}
+            </p>
+          </li>
+        </ul>
       </section>
     </template>
   </UContainer>
