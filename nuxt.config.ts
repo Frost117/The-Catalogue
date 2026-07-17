@@ -40,6 +40,11 @@ export default defineNuxtConfig({
     // Umbraco member-login backend. All /api/auth/* requests are proxied here
     // (server/api/auth/[...].ts); it owns the OTP flow and the session cookie.
     memberLoginHost: process.env.MEMBER_LOGIN_HOST || '',
+    // Name of the member session cookie the backend sets on login. Umbraco
+    // members use ASP.NET Core Identity's application scheme, whose cookie the
+    // backend doesn't rename, so it's the framework default. The comments proxy
+    // (server/api/comments.post.ts) rejects posts that arrive without it.
+    memberSessionCookie: process.env.MEMBER_SESSION_COOKIE || '.AspNetCore.Identity.Application',
     public: {}
   },
 
