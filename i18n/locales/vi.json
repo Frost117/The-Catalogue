@@ -71,7 +71,10 @@
     "verify": "Xác nhận",
     "invalidPhone": "Vui lòng nhập số điện thoại hợp lệ.",
     "invalidCode": "Mã không hợp lệ hoặc đã hết hạn.",
-    "requestFailed": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "requestFailed": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "loggedIn": "Bạn đã đăng nhập.",
+    "loggedOut": "Bạn đã đăng xuất.",
+    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại."
   },
   "comments": {
     "title": "Bình luận",

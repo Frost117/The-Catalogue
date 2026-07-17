@@ -71,7 +71,10 @@
     "verify": "Verify",
     "invalidPhone": "Enter a valid phone number.",
     "invalidCode": "That code is invalid or has expired.",
-    "requestFailed": "Something went wrong. Please try again."
+    "requestFailed": "Something went wrong. Please try again.",
+    "loggedIn": "You’re logged in.",
+    "loggedOut": "You’ve been logged out.",
+    "logoutFailed": "Couldn’t log you out. Please try again."
   },
   "comments": {
     "title": "Comments",

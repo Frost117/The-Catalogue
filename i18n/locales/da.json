@@ -71,7 +71,10 @@
     "verify": "Bekræft",
     "invalidPhone": "Indtast et gyldigt telefonnummer.",
     "invalidCode": "Koden er ugyldig eller udløbet.",
-    "requestFailed": "Noget gik galt. Prøv venligst igen."
+    "requestFailed": "Noget gik galt. Prøv venligst igen.",
+    "loggedIn": "Du er nu logget ind.",
+    "loggedOut": "Du er nu logget ud.",
+    "logoutFailed": "Kunne ikke logge dig ud. Prøv venligst igen."
   },
   "comments": {
     "title": "Kommentarer",
