@@ -1,5 +1,5 @@
-import type { RawShow, RawEpisode, RawCast, RawLocalizedText } from '~/types/compose'
-import type { CastMember, Episode, Show, ShowSummary } from '~/types/show'
+import type { RawShow, RawEpisode, RawCast, RawComment, RawLocalizedText } from '~/types/compose'
+import type { CastMember, Comment, Episode, Show, ShowSummary } from '~/types/show'
 
 // Coerce a GraphQL Decimal (which may arrive as number or string) to a number,
 // or null when absent.
@@ -83,6 +83,16 @@ export function mapCast(raw: RawCast): CastMember {
     name: raw.person?.name ?? '',
     character: raw.character?.name ?? null,
     image: raw.person?.image?.medium ?? null
+  }
+}
+
+export function mapComment(raw: RawComment): Comment {
+  return {
+    id: raw.id,
+    showId: toNum(raw.showId) ?? 0,
+    author: raw.memberName ?? '',
+    body: raw.text ?? '',
+    createdAt: raw.createdAt ?? ''
   }
 }
 
