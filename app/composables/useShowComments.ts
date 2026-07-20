@@ -1,19 +1,32 @@
 import { useAuth } from '~/composables/useAuth'
+import commentsQuery from '~/graphql/comments.gql?raw'
+import { gqlRequest } from '~/utils/gqlRequest'
+import { mapComment } from '~/utils/mapShow'
 import type { Comment } from '~/types/show'
+import type { RawComment, RawNodeConnection } from '~/types/compose'
 
-// Owns the show page's comment section: the (currently stubbed) read, the post
-// form state + submit, and the small view helpers (date formatting, jump-to
-// scroll). The view just binds what this returns.
+export const COMMENTS_PAGE_SIZE = 50
+
+// Owns the show page's comment section: the read (via Compose GraphQL,
+// newest-first), the post form state + submit, and the small view helpers
+// (date formatting, jump-to scroll). The view just binds what this returns.
 //
-// READ path is stubbed: the Compose GraphQL comments query isn't live yet (see
-// MEMORY — reads pending backend), so the list starts empty and only fills with
-// comments posted in this session. When the schema lands, replace the fetcher
-// below with a gqlRequest (newest-first, paginated) — the view won't change.
-//
-// WRITE path is real: submitComment() forwards to the Umbraco backend via the
-// same-origin /api/comments proxy (the member session cookie authenticates it),
-// then optimistically prepends the new comment since the read path can't fetch
-// it back yet.
+// WRITE path forwards to the Umbraco backend via the same-origin /api/comments
+// proxy (the member session cookie authenticates it), then optimistically
+// prepends the new comment. That optimistic entry is kept even though the
+// read path below is now live: read-after-write latency against Compose
+// hasn't been verified, so the existing local-id bridge is the safer choice.
+
+export async function fetchComments(id: number): Promise<Comment[]> {
+  const res = await gqlRequest<{ tvshow_collection: RawNodeConnection<RawComment> }>(
+    commentsQuery,
+    { where: { comment: { showId: id } }, first: COMMENTS_PAGE_SIZE }
+  )
+  return (res.tvshow_collection.items ?? [])
+    .filter((c): c is RawComment => !!c)
+    .map(mapComment)
+}
+
 export function useShowComments(showId: () => number | null) {
   const { user, loggedIn } = useAuth()
   const { locale } = useI18n()
@@ -22,12 +35,7 @@ export function useShowComments(showId: () => number | null) {
     () => `comments:${showId() ?? 'none'}`,
     async () => {
       const id = showId()
-      if (id == null) {
-        return []
-      }
-      // TODO: replace with a Compose GraphQL read once the schema exposes
-      // comments (key by `id`, newest first, paginate).
-      return []
+      return id == null ? [] : fetchComments(id)
     },
     { watch: [showId] }
   )
