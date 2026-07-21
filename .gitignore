@@ -12,6 +12,11 @@ dist
 # Node dependencies
 node_modules
 
+# This project uses pnpm (see packageManager in package.json) — never commit
+# a lockfile from a different package manager.
+package-lock.json
+yarn.lock
+
 # Logs
 logs
 *.log
