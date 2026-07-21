@@ -65,7 +65,10 @@ useSeoMeta({
       <NuxtPage />
     </UMain>
 
-    <UModal v-model:open="authModalOpen">
+    <UModal
+      v-model:open="authModalOpen"
+      :content="{ 'aria-labelledby': 'login-form-title' }"
+    >
       <template #body>
         <LoginForm @close="authModalOpen = false" />
       </template>
