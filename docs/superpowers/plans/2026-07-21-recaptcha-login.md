@@ -39,7 +39,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { useRecaptcha } from '~/composables/useRecaptcha'
 
-mockNuxtImport('useRuntimeConfig', () => () => ({ public: { recaptchaSiteKey: 'test-site-key' } }))
+mockNuxtImport('useRuntimeConfig', () => () => ({ app: { baseURL: '/' }, public: { recaptchaSiteKey: 'test-site-key' } }))
 
 // One test covering both behaviors deliberately: the script-injection guard
 // is module-level singleton state (by design — see useRecaptcha.ts), so
