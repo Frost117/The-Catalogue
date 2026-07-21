@@ -40,7 +40,13 @@ export default defineNuxtConfig({
     // Umbraco member-login backend. All /api/auth/* requests are proxied here
     // (server/api/auth/[...].ts); it owns the OTP flow and the session cookie.
     memberLoginHost: process.env.MEMBER_LOGIN_HOST || '',
-    public: {}
+    public: {
+      // reCAPTCHA v3 site key — unlike every other credential above, this one
+      // is meant to be public: it's loaded client-side by useRecaptcha.ts to
+      // execute the widget. The backend holds the matching secret key and
+      // verifies the token server-side; this app never sees that secret.
+      recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || ''
+    }
   },
 
   routeRules: {
