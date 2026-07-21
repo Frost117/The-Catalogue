@@ -101,7 +101,7 @@ export function mapEpisode(raw: RawEpisode, locale: string): Episode {
     id: raw.id,
     season: toNum(raw.season) ?? 0,
     number: toNum(raw.number) ?? 0,
-    name: raw.name ?? '',
+    name: resolveLocalized(raw.name, locale).text ?? '',
     summary: resolveLocalized(raw.summary, locale).text
   }
 }

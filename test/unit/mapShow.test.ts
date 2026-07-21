@@ -151,8 +151,13 @@ describe('mapCast / mapEpisode / mapShowDetail', () => {
   })
 
   it('coerces episode season/number decimals and defaults them to 0', () => {
-    const raw: RawEpisode = { id: 'episode-1', name: 'Pilot', season: '1' as unknown as number, number: null, summary: null }
+    const raw: RawEpisode = { id: 'episode-1', name: { en: 'Pilot', da: null, vi: null }, season: '1' as unknown as number, number: null, summary: null }
     expect(mapEpisode(raw, 'en')).toEqual({ id: 'episode-1', season: 1, number: 0, name: 'Pilot', summary: null })
+  })
+
+  it('falls back through locales for a localized episode name, same as show title', () => {
+    const raw: RawEpisode = { id: 'episode-1', name: { en: null, da: 'Piloten', vi: null }, season: 1, number: 1, summary: null }
+    expect(mapEpisode(raw, 'en').name).toBe('Piloten')
   })
 
   it('composes summary + cast + episodes into a detail', () => {
@@ -162,7 +167,7 @@ describe('mapCast / mapEpisode / mapShowDetail', () => {
     }
     const detail = mapShowDetail(
       show,
-      [{ id: 'episode-1', name: 'E1', season: 1, number: 1, summary: null }],
+      [{ id: 'episode-1', name: { en: 'E1', da: null, vi: null }, season: 1, number: 1, summary: null }],
       [{ id: 'cast-1-1', person: { name: 'A', image: null }, character: { name: 'C', image: null } }],
       'en'
     )
