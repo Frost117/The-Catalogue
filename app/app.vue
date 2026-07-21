@@ -65,7 +65,13 @@ useSeoMeta({
       <NuxtPage />
     </UMain>
 
-    <UModal v-model:open="authModalOpen">
+    <!-- @vue-expect-error aria-labelledby is a valid DOM attribute forwarded
+         to DialogContent via Nuxt UI's Modal.vue (v-bind="contentProps") at
+         runtime, but Reka UI's typed DialogContentProps doesn't declare it. -->
+    <UModal
+      v-model:open="authModalOpen"
+      :content="{ 'aria-labelledby': 'login-form-title' }"
+    >
       <template #body>
         <LoginForm @close="authModalOpen = false" />
       </template>
