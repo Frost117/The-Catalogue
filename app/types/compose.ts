@@ -7,9 +7,9 @@
 // Schema shape (third-env): show / episode / cast are sibling nodes in a single
 // `tvshow_collection`, keyed by namespaced ids (`show-{id}`, `episode-{id}`,
 // `cast-{personId}-{characterId}`). There is no `route`/slug and no per-`variant`
-// node — `variant` is always null. Localization is inline per field: only
-// `summary` is translated (a { en, da, vi } object); everything else is shared.
-// Episodes and cast link back to their show via the numeric `tvShowId`.
+// node — `variant` is always null. Localization is inline per field: `Show.name`
+// and `summary` are translated (each a { en, da, vi } object); everything else
+// is shared. Episodes and cast link back to their show via the numeric `tvShowId`.
 
 // Localized rich-text: TV Maze HTML markup per locale (strip before rendering).
 export interface RawLocalizedText {
@@ -33,7 +33,9 @@ export interface RawShowNetwork {
 
 export interface RawShow {
   id: string
-  name: string | null
+  // Localized (a live schema change made this a { en, da, vi } object,
+  // matching `summary`) — resolve with resolveLocalized().
+  name: RawLocalizedText | null
   genres: (string | null)[] | null
   status: string | null
   premiered: string | null

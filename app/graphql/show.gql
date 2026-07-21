@@ -4,13 +4,18 @@
 #
 # Episodes and cast are NOT nested under a show in this schema — they are sibling
 # content nodes linked by the numeric `tvShowId`, so they are fetched separately
-# (see episodes.gql / cast.gql). `summary` is localized inline ({ en, da, vi }).
+# (see episodes.gql / cast.gql). `name` and `summary` are localized inline
+# ({ en, da, vi }).
 query Show($where: NodeFilterInput!) {
   tvshow_collection(first: 1, where: $where) {
     items {
       ... on Show {
         id
-        name
+        name {
+          en
+          da
+          vi
+        }
         genres
         status
         premiered

@@ -85,7 +85,7 @@ describe('showSlug <-> showIdFromSlug round-trip', () => {
 describe('mapShowSummary', () => {
   const raw: RawShow = {
     id: 'show-1',
-    name: 'Under the Dome',
+    name: { en: 'Under the Dome', da: null, vi: null },
     genres: ['Drama', null, 'Sci-Fi'],
     status: 'Ended',
     premiered: '2013-06-24',
@@ -105,6 +105,13 @@ describe('mapShowSummary', () => {
       rating: 6.5,
       genres: ['Drama', 'Sci-Fi'] // nulls filtered out
     })
+  })
+
+  it('falls back through locales for a localized title, same as summary', () => {
+    const r = { ...raw, name: { en: null, da: 'Under Kuplen', vi: null } }
+    const mapped = mapShowSummary(r, 'en')
+    expect(mapped.title).toBe('Under Kuplen')
+    expect(mapped.slug).toBe('under-kuplen-1')
   })
 
   it('falls back to original image and coerces string ratings', () => {
@@ -150,7 +157,7 @@ describe('mapCast / mapEpisode / mapShowDetail', () => {
 
   it('composes summary + cast + episodes into a detail', () => {
     const show: RawShow = {
-      id: 'show-5', name: 'X', genres: [], status: 'Running', premiered: '2020-01-01',
+      id: 'show-5', name: { en: 'X', da: null, vi: null }, genres: [], status: 'Running', premiered: '2020-01-01',
       network: { name: 'HBO' }, image: null, rating: null, summary: null
     }
     const detail = mapShowDetail(

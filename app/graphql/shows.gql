@@ -6,7 +6,7 @@
 # entirely rather than sent as nulls. `tvshow_collection` caps `first` at 100.
 # There is no totalCount on this endpoint, so pagination is cursor-based
 # (pageInfo) and the UI uses a "load more" affordance. Fields are flat on Show
-# now (no `properties`); `summary` is localized inline ({ en, da, vi }).
+# now (no `properties`); `name` and `summary` are localized inline ({ en, da, vi }).
 query Shows($where: NodeFilterInput!, $first: Int!, $after: String) {
   tvshow_collection(
     first: $first
@@ -16,7 +16,11 @@ query Shows($where: NodeFilterInput!, $first: Int!, $after: String) {
     items {
       ... on Show {
         id
-        name
+        name {
+          en
+          da
+          vi
+        }
         genres
         image {
           medium

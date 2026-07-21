@@ -11,11 +11,11 @@ function toNum(value: number | string | null | undefined): number | null {
   return Number.isNaN(n) ? null : n
 }
 
-// Summary is the only per-language field in this schema; when the requested
-// locale has no text yet, fall through this order. `lang` reports which language
-// actually served the text, so the detail page can surface a "not translated"
-// hint.
-const SUMMARY_FALLBACK = ['en', 'da', 'vi'] as const
+// `name` and `summary` are the per-language fields in this schema; when the
+// requested locale has no text yet, fall through this order. `lang` reports
+// which language actually served the text, so the detail page can surface a
+// "not translated" hint.
+const LOCALE_FALLBACK = ['en', 'da', 'vi'] as const
 
 export function resolveLocalized(
   text: RawLocalizedText | null | undefined,
@@ -24,7 +24,7 @@ export function resolveLocalized(
   if (!text) {
     return { text: null, lang: null }
   }
-  const order = [locale, ...SUMMARY_FALLBACK.filter(l => l !== locale)]
+  const order = [locale, ...LOCALE_FALLBACK.filter(l => l !== locale)]
   for (const lang of order) {
     const value = text[lang as keyof RawLocalizedText]
     if (value) {
@@ -65,10 +65,11 @@ export function showIdFromSlug(slug: string): number | null {
 }
 
 export function mapShowSummary(raw: RawShow, locale: string): ShowSummary {
+  const name = resolveLocalized(raw.name, locale).text
   return {
     id: raw.id,
-    slug: showSlug(raw.id, raw.name),
-    title: raw.name ?? '',
+    slug: showSlug(raw.id, name),
+    title: name ?? '',
     summary: resolveLocalized(raw.summary, locale).text,
     image: raw.image?.medium ?? raw.image?.original ?? null,
     rating: toNum(raw.rating?.average),

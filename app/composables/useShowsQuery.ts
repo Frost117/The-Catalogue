@@ -7,8 +7,8 @@ import type { RawNodeConnection, RawShow } from '~/types/compose'
 export const CATALOGUE_PAGE_SIZE = 24
 
 export interface CatalogueFilters {
-  // The locale doesn't filter the query (name/genres are shared across
-  // languages); it only selects which `summary` translation the mapper reads.
+  // Selects which `name`/`summary` translation the mapper reads, and (via
+  // buildWhere) which localized `name` field the search filter matches against.
   locale: string
   search: string
   genre: string
@@ -21,12 +21,15 @@ interface CataloguePage {
 }
 
 // Translate filters into the Compose `where` input. Optional filters are only
-// included when set, so we never send `name_contains: null` or `genres_some:
-// [null]`.
+// included when set, so we never send `name: { en_contains: null }` or
+// `genres_some: [null]`. `name` is localized ({ en, da, vi }), so search
+// matches against whichever language field the catalogue is currently
+// displaying (filters.locale) — matching the mapper's display text keeps
+// "what you see is what you can search for".
 export function buildWhere(filters: CatalogueFilters) {
   const show: Record<string, unknown> = {}
   if (filters.search) {
-    show.name_contains = filters.search
+    show.name = { [`${filters.locale}_contains`]: filters.search }
   }
   if (filters.genre) {
     show.genres_some = [filters.genre]
