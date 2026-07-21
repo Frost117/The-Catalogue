@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, registerEndpoint } from '@nuxt/test-utils/runtime'
+import { readBody } from 'h3'
 import { ref } from 'vue'
 import { fetchComments, useShowComments, COMMENTS_PAGE_SIZE } from '~/composables/useShowComments'
 import type { RawComment } from '~/types/compose'
@@ -9,9 +10,23 @@ import type { Comment } from '~/types/show'
 const gql = vi.hoisted(() => ({ requestMock: vi.fn() }))
 vi.mock('~/utils/gqlRequest', () => ({ gqlRequest: gql.requestMock }))
 
-// $fetch is the write-path network seam (post() posts directly to it).
-const fetchMock = vi.hoisted(() => vi.fn())
-mockNuxtImport('$fetch', () => fetchMock)
+// $fetch is the write-path network seam (post() posts directly to it). It's
+// not one of Nuxt's unimport-based auto-imports the way composables are
+// (mockNuxtImport('$fetch', ...) throws "Cannot find import" under pnpm's
+// node_modules layout — confirmed by direct spike; it happened to work under
+// npm's, but that was coincidental, not a supported guarantee), and
+// vi.stubGlobal('$fetch', ...) doesn't intercept it either — Nuxt binds the
+// bare `$fetch` identifier to Nitro's real internal fetch, not
+// globalThis.$fetch (confirmed: a stubbed global sat unused while the real
+// implementation made an actual request and 404'd). registerEndpoint is the
+// mechanism @nuxt/test-utils actually documents for this: it registers a
+// real handler that the genuine $fetch call routes to, so it works
+// regardless of package manager.
+const postComments = vi.hoisted(() => vi.fn())
+registerEndpoint('/api/comments', {
+  method: 'POST',
+  handler: async event => postComments(await readBody(event))
+})
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key, locale: ref('en') }))
 
 const raw = (over: Partial<RawComment> = {}): RawComment => ({
@@ -33,7 +48,7 @@ const comment = (id: string): Comment => ({
 
 beforeEach(() => {
   gql.requestMock.mockReset()
-  fetchMock.mockReset()
+  postComments.mockReset()
 })
 
 describe('fetchComments', () => {
@@ -128,7 +143,7 @@ describe('useShowComments pagination', () => {
     gql.requestMock.mockResolvedValueOnce({
       tvshow_collection: { items: [raw({ id: 'c2' })], pageInfo: { hasNextPage: false, endCursor: 'cur2' } }
     })
-    fetchMock.mockResolvedValueOnce({})
+    postComments.mockResolvedValueOnce({})
 
     const c = useShowComments(() => 1)
     await c.loadMore()
@@ -140,7 +155,7 @@ describe('useShowComments pagination', () => {
     // The optimistic comment is prepended to the first page; the
     // already-loaded second page (c2) must still be present afterward.
     expect(c.comments.value.map(x => x.id).slice(1)).toEqual(['c1', 'c2'])
-    expect(fetchMock).toHaveBeenCalledWith('/api/comments', { method: 'POST', body: { showId: 1, comment: 'new comment' } })
+    expect(postComments).toHaveBeenCalledWith({ showId: 1, comment: 'new comment' })
   })
 
   it('discards a stale loadMore response if the show changes before it resolves', async () => {
