@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { ref, computed } from 'vue'
 import axe from 'axe-core'
@@ -14,6 +14,11 @@ mockNuxtImport('useRouter', () => () => ({
 }))
 mockNuxtImport('useSeoMeta', () => vi.fn())
 
+// ShowCard.vue only renders its hover popover (a second, duplicate title/
+// rating/genre block) when the stripped summary exceeds SUMMARY_POPOVER_THRESHOLD
+// (140 chars) — see app/components/ShowCard.vue. This second show's long
+// summary exists specifically to trigger that branch so its markup gets
+// scanned too, not just the plain-tile branch the first show renders.
 const shows: ShowSummary[] = [
   {
     id: 'show-1',
@@ -23,6 +28,15 @@ const shows: ShowSummary[] = [
     image: null,
     rating: 6.5,
     genres: ['Drama', 'Sci-Fi']
+  },
+  {
+    id: 'show-2',
+    slug: 'grimm-2',
+    title: 'Grimm',
+    summary: '<p>Grimm is a drama series inspired by the classic Grimm Brothers\' Fairy Tales. After Portland homicide detective Nick Burkhardt discovers he\'s descended from an elite line of criminal profilers known as "Grimms", he increasingly finds his responsibilities as a detective at odds with his new responsibilities as a Grimm.</p>',
+    image: null,
+    rating: 8.4,
+    genres: ['Drama', 'Crime', 'Supernatural']
   }
 ]
 
@@ -49,6 +63,14 @@ function formatViolations(violations: import('axe-core').Result[]): string {
 }
 
 describe('accessibility: catalogue page', () => {
+  // Each test mounts its own <main> into document.body; without cleanup a
+  // second test would see the first test's leftover <main>, producing a
+  // false-positive landmark-no-duplicate-main/landmark-unique violation
+  // that's purely a test artifact (same fix as test/nuxt/a11y/show-detail.test.ts).
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
   it('has no axe violations with results rendered', async () => {
     // Mount into a <main> element rather than a plain <div>. In real usage this
     // page is never rendered standalone — app.vue always wraps <NuxtPage> in
@@ -66,6 +88,35 @@ describe('accessibility: catalogue page', () => {
     const el = document.createElement('main')
     document.body.appendChild(el)
     await mountSuspended(IndexPage, { attachTo: el })
+
+    const results = await axe.run(document.body)
+    expect(results.violations.length, formatViolations(results.violations)).toBe(0)
+  })
+
+  it('has no axe violations with the hover popover open (long-summary card)', async () => {
+    // ShowCard.vue's popover only mounts its content once opened, and it's a
+    // hover-triggered Reka UI HoverCard (mode="hover"): the trigger's real
+    // pointerenter/focus listener is applied via as-child (verified in
+    // node_modules/reka-ui/src/HoverCard/HoverCardTrigger.vue), and opening
+    // always waits out ShowCard.vue's :open-delay="150" regardless of trigger
+    // method (node_modules/reka-ui/src/HoverCard/HoverCardRoot.vue's
+    // handleOpen always sets a setTimeout for openDelay). So triggering a real
+    // pointerenter and waiting past that delay is the only way to get the
+    // popover's content into the DOM for axe to scan — this is exactly the
+    // kind of conditionally-rendered markup Task 4's show-detail audit forced
+    // into the DOM (expanded accordion, logged-in comment form), applied here
+    // to the catalogue's own conditional branch.
+    const el = document.createElement('main')
+    document.body.appendChild(el)
+    await mountSuspended(IndexPage, { attachTo: el })
+
+    // [data-grace-area-trigger] is the exact attribute Reka UI's
+    // HoverCardTrigger applies to the trigger element (verified in
+    // node_modules/reka-ui/src/HoverCard/HoverCardTrigger.vue); only the
+    // long-summary ("Grimm") card has one, since only it renders the popover.
+    const trigger = document.body.querySelector('[data-grace-area-trigger]') as HTMLElement
+    trigger.dispatchEvent(new Event('pointerenter'))
+    await new Promise(resolve => setTimeout(resolve, 250))
 
     const results = await axe.run(document.body)
     expect(results.violations.length, formatViolations(results.violations)).toBe(0)
