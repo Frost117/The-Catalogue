@@ -142,4 +142,21 @@ describe('useShowComments pagination', () => {
     expect(c.comments.value.map(x => x.id).slice(1)).toEqual(['c1', 'c2'])
     expect(fetchMock).toHaveBeenCalledWith('/api/comments', { method: 'POST', body: { showId: 1, comment: 'new comment' } })
   })
+
+  it('discards a stale loadMore response if the show changes before it resolves', async () => {
+    let currentShowId = 1
+    asyncState.data = ref({ items: [comment('c1')], endCursor: 'cur1', hasNextPage: true })
+    gql.requestMock.mockResolvedValueOnce({
+      tvshow_collection: { items: [raw({ id: 'c2' })], pageInfo: { hasNextPage: false, endCursor: 'cur2' } }
+    })
+
+    const c = useShowComments(() => currentShowId)
+    const loadPromise = c.loadMore()
+    currentShowId = 2 // show changes while the fetch above is still in flight
+    await loadPromise
+
+    // The stale page for show 1 must not have been appended.
+    expect(c.comments.value.map(x => x.id)).toEqual(['c1'])
+    expect(c.loadingMore.value).toBe(false)
+  })
 })

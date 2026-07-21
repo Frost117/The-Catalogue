@@ -78,6 +78,9 @@ export function useShowComments(showId: () => number | null) {
     loadingMore.value = true
     try {
       const page = await fetchComments(id, cursor.value)
+      if (showId() !== id) {
+        return
+      }
       appended.value = {
         items: [...(appended.value?.items ?? []), ...page.items],
         cursor: page.endCursor,
