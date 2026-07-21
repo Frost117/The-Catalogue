@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { nextTick } from 'vue'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
-import {
-  useCatalogueFilters,
-  parseSortBy,
-  parseSortDir,
-  firstQuery,
-  DEFAULT_SORT_DIR
-} from '~/composables/useCatalogueFilters'
+import { useCatalogueFilters, firstQuery } from '~/composables/useCatalogueFilters'
 
 // Mutable mock state shared with the hoisted mockNuxtImport factories below.
 const mocks = vi.hoisted(() => ({
@@ -53,41 +47,17 @@ describe('firstQuery', () => {
   })
 })
 
-describe('parseSortBy', () => {
-  it('accepts valid sort fields and defaults to title otherwise', () => {
-    expect(parseSortBy('rating')).toBe('rating')
-    expect(parseSortBy('release')).toBe('release')
-    expect(parseSortBy('title')).toBe('title')
-    expect(parseSortBy('bogus')).toBe('title')
-    expect(parseSortBy(undefined)).toBe('title')
-  })
-})
-
-describe('parseSortDir', () => {
-  it('accepts asc/desc and otherwise falls back to the field default', () => {
-    expect(parseSortDir('asc', 'rating')).toBe('asc')
-    expect(parseSortDir('desc', 'title')).toBe('desc')
-    expect(parseSortDir('bogus', 'rating')).toBe(DEFAULT_SORT_DIR.rating) // 'desc'
-    expect(parseSortDir(undefined, 'title')).toBe(DEFAULT_SORT_DIR.title) // 'asc'
-  })
-})
-
 // --- Composable behaviour ---
 
 describe('useCatalogueFilters — initial state from URL', () => {
-  it('defaults to title/asc with no query', () => {
+  it('defaults to no filters with no query', () => {
     const f = useCatalogueFilters(() => [])
-    expect(f.sortBy.value).toBe('title')
-    expect(f.sortDir.value).toBe('asc')
     expect(f.hasFilters.value).toBe(false)
   })
 
-  it('restores sortBy and sortDir verbatim from the URL (no default reset)', () => {
-    // rating's natural default is desc; asc from the URL must survive restore.
-    mocks.routeQuery = { sortBy: 'rating', sortDir: 'asc', q: 'dome', genre: 'Drama' }
+  it('restores search and genre from the URL', () => {
+    mocks.routeQuery = { q: 'dome', genre: 'Drama' }
     const f = useCatalogueFilters(() => [])
-    expect(f.sortBy.value).toBe('rating')
-    expect(f.sortDir.value).toBe('asc')
     expect(f.searchInput.value).toBe('dome')
     expect(f.genre.value).toBe('Drama')
     expect(f.hasFilters.value).toBe(true)
@@ -117,64 +87,26 @@ describe('genre sentinel proxy', () => {
   })
 })
 
-describe('sort direction defaults + toggle', () => {
-  it('resets direction to the field default when the sort field changes', () => {
-    const f = useCatalogueFilters(() => [])
-    f.sortBySelection.value = 'rating'
-    expect(f.sortBy.value).toBe('rating')
-    expect(f.sortDir.value).toBe('desc') // rating default
-
-    f.sortBySelection.value = 'title'
-    expect(f.sortDir.value).toBe('asc') // title default
-  })
-
-  it('toggleSortDir flips direction', () => {
-    const f = useCatalogueFilters(() => [])
-    expect(f.sortDir.value).toBe('asc')
-    f.toggleSortDir()
-    expect(f.sortDir.value).toBe('desc')
-    f.toggleSortDir()
-    expect(f.sortDir.value).toBe('asc')
-  })
-})
-
 describe('clearFilters / hasFilters', () => {
-  it('reports filters from search or genre only (not sort)', () => {
+  it('reports filters from search or genre', () => {
     const f = useCatalogueFilters(() => [])
-    expect(f.hasFilters.value).toBe(false)
-    f.sortBySelection.value = 'rating' // sort change does not count as a filter
     expect(f.hasFilters.value).toBe(false)
     f.genre.value = 'Drama'
     expect(f.hasFilters.value).toBe(true)
   })
 
-  it('clears search and genre but leaves sort untouched', () => {
-    mocks.routeQuery = { q: 'dome', genre: 'Drama', sortBy: 'rating', sortDir: 'asc' }
+  it('clears search and genre', () => {
+    mocks.routeQuery = { q: 'dome', genre: 'Drama' }
     const f = useCatalogueFilters(() => [])
     f.clearFilters()
     expect(f.searchInput.value).toBe('')
     expect(f.search.value).toBe('')
     expect(f.genre.value).toBe('')
     expect(f.hasFilters.value).toBe(false)
-    expect(f.sortBy.value).toBe('rating') // sort preserved
-    expect(f.sortDir.value).toBe('asc')
   })
 })
 
 describe('URL sync (default-omission rule)', () => {
-  it('omits sortBy/sortDir from the URL when they equal the defaults', async () => {
-    const f = useCatalogueFilters(() => [])
-    // rating -> desc is rating's default, so only sortBy is written.
-    f.sortBySelection.value = 'rating'
-    await nextTick()
-    expect(mocks.routerReplace).toHaveBeenLastCalledWith({ query: { sortBy: 'rating' } })
-
-    // Flip to asc (non-default for rating) -> both keys present.
-    f.toggleSortDir()
-    await nextTick()
-    expect(mocks.routerReplace).toHaveBeenLastCalledWith({ query: { sortBy: 'rating', sortDir: 'asc' } })
-  })
-
   it('drops the query entirely back to defaults', async () => {
     const f = useCatalogueFilters(() => [])
     f.genre.value = 'Drama'

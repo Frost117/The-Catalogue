@@ -12,11 +12,6 @@ const {
   genre,
   genreSelection,
   genreItems,
-  sortBy,
-  sortDir,
-  sortBySelection,
-  sortFieldItems,
-  toggleSortDir,
   hasFilters,
   clearFilters
 } = useCatalogueFilters(() => genres.value)
@@ -32,19 +27,10 @@ const {
 } = useShowsQuery(() => ({
   locale: locale.value,
   search: search.value,
-  genre: genre.value,
-  sortBy: sortBy.value,
-  sortDir: sortDir.value
+  genre: genre.value
 }))
 
 const pending = computed(() => status.value === 'pending')
-
-const sortDirIcon = computed(() =>
-  sortDir.value === 'asc' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'
-)
-const sortDirLabel = computed(() =>
-  sortDir.value === 'asc' ? t('catalogue.sortDirection.ascLabel') : t('catalogue.sortDirection.descLabel')
-)
 
 useSeoMeta({
   title: () => t('catalogue.title'),
@@ -72,20 +58,6 @@ useSeoMeta({
           value-key="value"
           :aria-label="t('catalogue.genreLabel')"
           class="sm:w-48"
-        />
-        <USelect
-          v-model="sortBySelection"
-          :items="sortFieldItems"
-          value-key="value"
-          :aria-label="t('catalogue.sortLabel')"
-          class="sm:w-44"
-        />
-        <UButton
-          color="neutral"
-          variant="ghost"
-          :icon="sortDirIcon"
-          :aria-label="sortDirLabel"
-          @click="toggleSortDir"
         />
         <UButton
           v-if="hasFilters"
@@ -153,7 +125,7 @@ useSeoMeta({
 
     <!-- Results -->
     <template v-else>
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         <ShowCard
           v-for="show in shows"
           :key="show.id"

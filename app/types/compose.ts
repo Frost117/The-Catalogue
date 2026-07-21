@@ -41,9 +41,6 @@ export interface RawShow {
   image: RawImage | null
   rating: RawShowRating | null
   summary: RawLocalizedText | null
-  // Comment count, once the Compose schema exposes it (absent today — the
-  // comments read path isn't live yet). GraphQL Decimal, so coerce with Number().
-  commentCount?: number | string | null
 }
 
 export interface RawEpisode {

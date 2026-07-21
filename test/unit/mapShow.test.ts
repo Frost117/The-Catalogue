@@ -103,8 +103,7 @@ describe('mapShowSummary', () => {
       summary: '<p>Summary</p>',
       image: 'med.jpg',
       rating: 6.5,
-      genres: ['Drama', 'Sci-Fi'], // nulls filtered out
-      commentCount: null // absent on the raw fixture -> null
+      genres: ['Drama', 'Sci-Fi'] // nulls filtered out
     })
   })
 

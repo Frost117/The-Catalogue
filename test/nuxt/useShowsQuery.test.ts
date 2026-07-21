@@ -1,15 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { ref } from 'vue'
-import { buildWhere, buildOrderByLiteral, useShowsQuery, CATALOGUE_PAGE_SIZE, type CatalogueFilters } from '~/composables/useShowsQuery'
+import { buildWhere, useShowsQuery, CATALOGUE_PAGE_SIZE, type CatalogueFilters } from '~/composables/useShowsQuery'
 import type { ShowSummary } from '~/types/show'
 
 const baseFilters = (over: Partial<CatalogueFilters> = {}): CatalogueFilters => ({
   locale: 'en',
   search: '',
   genre: '',
-  sortBy: 'title',
-  sortDir: 'asc',
   ...over
 })
 
@@ -26,15 +24,6 @@ describe('buildWhere', () => {
     expect(buildWhere(baseFilters({ search: 'dome', genre: 'Drama' }))).toEqual({
       show: { name_contains: 'dome', genres_some: ['Drama'] }
     })
-  })
-})
-
-describe('buildOrderByLiteral', () => {
-  it('maps each field/direction pair to the right orderBy literal', () => {
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'title', sortDir: 'asc' }))).toBe('[{ show: { name: ASC } }]')
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'title', sortDir: 'desc' }))).toBe('[{ show: { name: DESC } }]')
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'rating', sortDir: 'desc' }))).toBe('[{ show: { rating: { average: DESC } } }]')
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'release', sortDir: 'asc' }))).toBe('[{ show: { premiered: ASC } }]')
   })
 })
 

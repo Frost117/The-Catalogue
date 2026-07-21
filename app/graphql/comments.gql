@@ -3,10 +3,9 @@
 # separate top-level query field), filtered by `comment.showId` and sorted
 # by `comment.createdAt` — both confirmed via live introspection.
 #
-# Unlike shows.gql's `orderBy` (a string-substituted `__ORDER_BY__` literal,
-# because its input type name was unconfirmed), `NodeSortOrderInput` here is
-# a confirmed real type name and the order never varies, so `orderBy` is a
-# plain inline literal.
+# `orderBy` is a plain inline literal since `NodeSortOrderInput` is a
+# confirmed real type name and the order never varies (no user-facing sort
+# control for comments).
 #
 # No pagination UI exists yet for comments, so this fetches a single page of
 # up to $first and does not select pageInfo — add it if/when a "load more"

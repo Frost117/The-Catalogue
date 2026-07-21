@@ -22,17 +22,7 @@
     "noResults": "No shows match your search.",
     "clearFilters": "Clear filters",
     "loadMore": "Load more",
-    "seasonsCount": "{count} season | {count} seasons",
-    "sortLabel": "Sort by",
-    "sortBy": {
-      "title": "Title",
-      "rating": "Rating",
-      "release": "Release date"
-    },
-    "sortDirection": {
-      "ascLabel": "Sort ascending",
-      "descLabel": "Sort descending"
-    }
+    "seasonsCount": "{count} season | {count} seasons"
   },
   "show": {
     "rating": "Rating",

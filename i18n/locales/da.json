@@ -22,17 +22,7 @@
     "noResults": "Ingen serier matcher din søgning.",
     "clearFilters": "Ryd filtre",
     "loadMore": "Indlæs flere",
-    "seasonsCount": "{count} sæson | {count} sæsoner",
-    "sortLabel": "Sortér efter",
-    "sortBy": {
-      "title": "Titel",
-      "rating": "Bedømmelse",
-      "release": "Udgivelsesdato"
-    },
-    "sortDirection": {
-      "ascLabel": "Sortér stigende",
-      "descLabel": "Sortér faldende"
-    }
+    "seasonsCount": "{count} sæson | {count} sæsoner"
   },
   "show": {
     "rating": "Bedømmelse",
