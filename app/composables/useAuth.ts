@@ -23,8 +23,11 @@ export function useAuth() {
     return user.value
   }
 
-  async function requestOtp(phone: number, callingCode: number) {
-    await $fetch('/api/auth/request-otp', { method: 'POST', body: { phone, callingCode } })
+  // `recaptchaToken` is the field name the backend's request-otp endpoint is
+  // expected to read the v3 token from — unverified against the live backend;
+  // confirm and adjust if it's rejected or named differently.
+  async function requestOtp(phone: number, callingCode: number, recaptchaToken: string) {
+    await $fetch('/api/auth/request-otp', { method: 'POST', body: { phone, callingCode, recaptchaToken } })
   }
 
   async function verifyOtp(phone: number, callingCode: number, code: string) {
