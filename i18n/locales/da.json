@@ -72,6 +72,7 @@
     "posting": "Sender…",
     "postError": "Kunne ikke sende din kommentar. Prøv igen.",
     "count": "{count} kommentar | {count} kommentarer",
-    "jump": "Gå til kommentarer"
+    "jump": "Gå til kommentarer",
+    "loadMore": "Indlæs flere"
   }
 }

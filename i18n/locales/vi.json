@@ -72,6 +72,7 @@
     "posting": "Đang đăng…",
     "postError": "Không thể đăng bình luận của bạn. Vui lòng thử lại.",
     "count": "{count} bình luận",
-    "jump": "Đến phần bình luận"
+    "jump": "Đến phần bình luận",
+    "loadMore": "Tải thêm"
   }
 }

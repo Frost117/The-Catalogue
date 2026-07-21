@@ -50,6 +50,9 @@ const showId = computed(() => (show.value ? showNumericId(show.value.id) : null)
 const {
   comments,
   count: commentCount,
+  hasMore,
+  loadMore,
+  loadingMore,
   loggedIn,
   commentBody,
   posting,
@@ -353,6 +356,19 @@ useSeoMeta({
             </p>
           </li>
         </ul>
+
+        <div
+          v-if="hasMore"
+          class="mt-4 flex justify-center"
+        >
+          <UButton
+            color="neutral"
+            variant="soft"
+            :loading="loadingMore"
+            :label="t('comments.loadMore')"
+            @click="loadMore"
+          />
+        </div>
       </section>
     </template>
   </UContainer>
