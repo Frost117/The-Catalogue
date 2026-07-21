@@ -72,6 +72,7 @@
     "posting": "Posting…",
     "postError": "Couldn’t post your comment. Please try again.",
     "count": "{count} comment | {count} comments",
-    "jump": "Jump to comments"
+    "jump": "Jump to comments",
+    "loadMore": "Load more"
   }
 }
