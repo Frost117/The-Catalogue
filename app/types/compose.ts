@@ -66,6 +66,15 @@ export interface RawCast {
   character: RawCastParty | null
 }
 
+export interface RawComment {
+  id: string
+  createdAt: string | null
+  memberName: string | null
+  // GraphQL Decimal, so coerce with Number() when mapping.
+  showId: number | string | null
+  text: string | null
+}
+
 export interface RawPageInfo {
   hasNextPage: boolean
   endCursor: string | null

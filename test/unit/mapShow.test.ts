@@ -7,9 +7,10 @@ import {
   mapShowSummary,
   mapCast,
   mapEpisode,
-  mapShowDetail
+  mapShowDetail,
+  mapComment
 } from '../../app/utils/mapShow'
-import type { RawShow, RawEpisode, RawCast, RawLocalizedText } from '../../app/types/compose'
+import type { RawShow, RawEpisode, RawCast, RawComment, RawLocalizedText } from '../../app/types/compose'
 
 describe('resolveLocalized', () => {
   const text: RawLocalizedText = { en: 'English', da: 'Dansk', vi: 'Tiếng Việt' }
@@ -165,5 +166,36 @@ describe('mapCast / mapEpisode / mapShowDetail', () => {
     expect(detail.episodes).toHaveLength(1)
     expect(detail.cast).toHaveLength(1)
     expect(detail.slug).toBe('x-5')
+  })
+})
+
+describe('mapComment', () => {
+  const raw: RawComment = {
+    id: 'c1',
+    createdAt: '2026-07-15T10:08:20.000Z',
+    memberName: '+84971026949',
+    showId: 1,
+    text: 'Test comment ne'
+  }
+
+  it('maps a raw comment to the domain shape', () => {
+    expect(mapComment(raw)).toEqual({
+      id: 'c1',
+      showId: 1,
+      author: '+84971026949',
+      body: 'Test comment ne',
+      createdAt: '2026-07-15T10:08:20.000Z'
+    })
+  })
+
+  it('coerces a decimal-string showId', () => {
+    expect(mapComment({ ...raw, showId: '5' as unknown as number }).showId).toBe(5)
+  })
+
+  it('defaults missing author/body/createdAt', () => {
+    const mapped = mapComment({ ...raw, memberName: null, text: null, createdAt: null })
+    expect(mapped.author).toBe('')
+    expect(mapped.body).toBe('')
+    expect(mapped.createdAt).toBe('')
   })
 })
