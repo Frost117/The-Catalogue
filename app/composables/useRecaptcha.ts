@@ -34,8 +34,17 @@ function loadScript(siteKey: string): Promise<void> {
 export function useRecaptcha() {
   const siteKey = useRuntimeConfig().public.recaptchaSiteKey
 
+  if (import.meta.dev && import.meta.client && !siteKey) {
+    console.warn('RECAPTCHA_SITE_KEY is not set — the phone-OTP request will fail. See .env.example.')
+  }
+
   if (import.meta.client && siteKey) {
-    loadScript(siteKey)
+    // Fire-and-forget: a failure here is not swallowed silently — execute()
+    // below awaits this same singleton promise and surfaces the rejection
+    // through its own caller's error handling. This call just starts the
+    // load early (as soon as the login modal mounts) without leaving an
+    // unhandled-rejection warning if it fails before execute() is called.
+    loadScript(siteKey).catch(() => {})
   }
 
   async function execute(action: string): Promise<string> {
