@@ -10,6 +10,9 @@ const auth = vi.hoisted(() => ({
 
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 mockNuxtImport('useAuth', () => () => ({ ...auth, logout: vi.fn(), user: null, loggedIn: false }))
+vi.mock('~/composables/useRecaptcha', () => ({
+  useRecaptcha: () => ({ execute: vi.fn().mockResolvedValue('test-token') })
+}))
 
 beforeEach(() => {
   auth.requestOtp.mockReset()
@@ -30,7 +33,7 @@ describe('useAuthForm — phone step', () => {
     f.callingCode.value = 45
     await f.submitPhoneStep()
 
-    expect(auth.requestOtp).toHaveBeenCalledWith(20123456, 45)
+    expect(auth.requestOtp).toHaveBeenCalledWith(20123456, 45, 'test-token')
     expect(f.step.value).toBe('code')
     expect(f.errorMessage.value).toBeNull()
     expect(f.loading.value).toBe(false)

@@ -6,6 +6,7 @@ import { DEFAULT_CALLING_CODE } from '~/utils/callingCodes'
 export function useAuthForm(onSuccess: () => void) {
   const { t } = useI18n()
   const { requestOtp, verifyOtp } = useAuth()
+  const { execute } = useRecaptcha()
 
   const step = ref<'phone' | 'code'>('phone')
   const phone = ref('')
@@ -18,7 +19,8 @@ export function useAuthForm(onSuccess: () => void) {
     loading.value = true
     errorMessage.value = null
     try {
-      await requestOtp(Number(phone.value), callingCode.value)
+      const recaptchaToken = await execute('login')
+      await requestOtp(Number(phone.value), callingCode.value, recaptchaToken)
       step.value = 'code'
     } catch (err) {
       const statusCode = (err as { statusCode?: number })?.statusCode
