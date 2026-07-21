@@ -47,9 +47,9 @@ const summary = computed(() => stripHtml(props.show.summary))
       </template>
 
       <div class="flex items-start justify-between gap-2">
-        <h3 class="line-clamp-2 font-semibold text-highlighted">
+        <h2 class="line-clamp-2 font-semibold text-highlighted">
           {{ show.title }}
-        </h3>
+        </h2>
         <UBadge
           v-if="rating"
           color="primary"
