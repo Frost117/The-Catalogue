@@ -7,9 +7,10 @@
 // Schema shape (third-env): show / episode / cast are sibling nodes in a single
 // `tvshow_collection`, keyed by namespaced ids (`show-{id}`, `episode-{id}`,
 // `cast-{personId}-{characterId}`). There is no `route`/slug and no per-`variant`
-// node — `variant` is always null. Localization is inline per field: only
-// `summary` is translated (a { en, da, vi } object); everything else is shared.
-// Episodes and cast link back to their show via the numeric `tvShowId`.
+// node — `variant` is always null. Localization is inline per field: `Show.name`,
+// `Episode.name`, and both `summary` fields are translated (each a { en, da, vi }
+// object); cast names (person/character) are shared, not localized. Episodes and
+// cast link back to their show via the numeric `tvShowId`.
 
 // Localized rich-text: TV Maze HTML markup per locale (strip before rendering).
 export interface RawLocalizedText {
@@ -33,7 +34,9 @@ export interface RawShowNetwork {
 
 export interface RawShow {
   id: string
-  name: string | null
+  // Localized (a live schema change made this a { en, da, vi } object,
+  // matching `summary`) — resolve with resolveLocalized().
+  name: RawLocalizedText | null
   genres: (string | null)[] | null
   status: string | null
   premiered: string | null
@@ -41,14 +44,13 @@ export interface RawShow {
   image: RawImage | null
   rating: RawShowRating | null
   summary: RawLocalizedText | null
-  // Comment count, once the Compose schema exposes it (absent today — the
-  // comments read path isn't live yet). GraphQL Decimal, so coerce with Number().
-  commentCount?: number | string | null
 }
 
 export interface RawEpisode {
   id: string
-  name: string | null
+  // Localized (same live schema change as Show.name) — resolve with
+  // resolveLocalized().
+  name: RawLocalizedText | null
   // `season` / `number` are GraphQL Decimals — coerce with Number() when mapping.
   season: number | null
   number: number | null
@@ -64,6 +66,15 @@ export interface RawCast {
   id: string
   person: RawCastParty | null
   character: RawCastParty | null
+}
+
+export interface RawComment {
+  id: string
+  createdAt: string | null
+  memberName: string | null
+  // GraphQL Decimal, so coerce with Number() when mapping.
+  showId: number | string | null
+  text: string | null
 }
 
 export interface RawPageInfo {

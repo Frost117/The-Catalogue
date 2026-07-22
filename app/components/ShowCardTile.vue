@@ -13,7 +13,6 @@ const localePath = useLocalePath()
 const to = computed(() => localePath({ name: 'shows-slug', params: { slug: props.show.slug } }))
 const rating = computed(() => formatRating(props.show.rating))
 const summary = computed(() => stripHtml(props.show.summary))
-const commentCount = computed(() => props.show.commentCount ?? 0)
 </script>
 
 <template>
@@ -48,9 +47,9 @@ const commentCount = computed(() => props.show.commentCount ?? 0)
       </template>
 
       <div class="flex items-start justify-between gap-2">
-        <h3 class="line-clamp-2 font-semibold text-highlighted">
+        <h2 class="line-clamp-2 font-semibold text-highlighted">
           {{ show.title }}
-        </h3>
+        </h2>
         <UBadge
           v-if="rating"
           color="primary"
@@ -88,18 +87,6 @@ const commentCount = computed(() => props.show.commentCount ?? 0)
         {{ summary }}
       </p>
 
-      <template #footer>
-        <div
-          class="flex items-center gap-1.5 text-sm text-muted"
-          :aria-label="t('comments.count', { count: commentCount }, commentCount)"
-        >
-          <UIcon
-            name="i-lucide-message-circle"
-            class="size-4"
-          />
-          <span>{{ commentCount }}</span>
-        </div>
-      </template>
     </UCard>
   </ULink>
 </template>

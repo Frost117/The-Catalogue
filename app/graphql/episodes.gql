@@ -1,6 +1,7 @@
 # Episodes for a show. Episodes are sibling content nodes linked to their show by
 # the numeric `tvShowId` (the TV Maze show id, i.e. the number in `show-<n>`), so
-# they are matched by `{ episode: { tvShowId: <n> } }`.
+# they are matched by `{ episode: { tvShowId: <n> } }`. `name` and `summary` are
+# localized inline ({ en, da, vi }), same as Show.
 #
 # `first` is capped at 100; the composable pages through with `after` until
 # pageInfo.hasNextPage is false to gather every episode.
@@ -9,7 +10,11 @@ query Episodes($where: NodeFilterInput!, $after: String) {
     items {
       ... on Episode {
         id
-        name
+        name {
+          en
+          da
+          vi
+        }
         season
         number
         summary {

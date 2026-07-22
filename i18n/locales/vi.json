@@ -22,17 +22,7 @@
     "noResults": "Không có chương trình nào phù hợp với tìm kiếm của bạn.",
     "clearFilters": "Xóa bộ lọc",
     "loadMore": "Tải thêm",
-    "seasonsCount": "{count} phần",
-    "sortLabel": "Sắp xếp theo",
-    "sortBy": {
-      "title": "Tiêu đề",
-      "rating": "Đánh giá",
-      "release": "Ngày phát hành"
-    },
-    "sortDirection": {
-      "ascLabel": "Sắp xếp tăng dần",
-      "descLabel": "Sắp xếp giảm dần"
-    }
+    "seasonsCount": "{count} phần"
   },
   "show": {
     "rating": "Đánh giá",
@@ -85,6 +75,7 @@
     "posting": "Đang đăng…",
     "postError": "Không thể đăng bình luận của bạn. Vui lòng thử lại.",
     "count": "{count} bình luận",
-    "jump": "Đến phần bình luận"
+    "jump": "Đến phần bình luận",
+    "loadMore": "Tải thêm"
   }
 }

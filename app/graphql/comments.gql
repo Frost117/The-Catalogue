@@ -1,0 +1,30 @@
+# Comments for a single show, newest first, paginated. `Comment` is a sibling
+# node in `tvshow_collection` (same pattern as show.gql/episodes.gql/cast.gql,
+# not a separate top-level query field), filtered by `comment.showId` and
+# sorted by `comment.createdAt` — both confirmed via live introspection.
+#
+# `orderBy` is a plain inline literal since `NodeSortOrderInput` is a
+# confirmed real type name and the order never varies (no user-facing sort
+# control for comments).
+query Comments($where: NodeFilterInput!, $first: Int!, $after: String) {
+  tvshow_collection(
+    first: $first
+    after: $after
+    where: $where
+    orderBy: [{ comment: { createdAt: DESC } }]
+  ) {
+    items {
+      ... on Comment {
+        id
+        createdAt
+        memberName
+        showId
+        text
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

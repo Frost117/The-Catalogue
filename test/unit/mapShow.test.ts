@@ -7,9 +7,10 @@ import {
   mapShowSummary,
   mapCast,
   mapEpisode,
-  mapShowDetail
+  mapShowDetail,
+  mapComment
 } from '../../app/utils/mapShow'
-import type { RawShow, RawEpisode, RawCast, RawLocalizedText } from '../../app/types/compose'
+import type { RawShow, RawEpisode, RawCast, RawComment, RawLocalizedText } from '../../app/types/compose'
 
 describe('resolveLocalized', () => {
   const text: RawLocalizedText = { en: 'English', da: 'Dansk', vi: 'Tiếng Việt' }
@@ -84,7 +85,7 @@ describe('showSlug <-> showIdFromSlug round-trip', () => {
 describe('mapShowSummary', () => {
   const raw: RawShow = {
     id: 'show-1',
-    name: 'Under the Dome',
+    name: { en: 'Under the Dome', da: null, vi: null },
     genres: ['Drama', null, 'Sci-Fi'],
     status: 'Ended',
     premiered: '2013-06-24',
@@ -102,9 +103,15 @@ describe('mapShowSummary', () => {
       summary: '<p>Summary</p>',
       image: 'med.jpg',
       rating: 6.5,
-      genres: ['Drama', 'Sci-Fi'], // nulls filtered out
-      commentCount: null // absent on the raw fixture -> null
+      genres: ['Drama', 'Sci-Fi'] // nulls filtered out
     })
+  })
+
+  it('falls back through locales for a localized title, same as summary', () => {
+    const r = { ...raw, name: { en: null, da: 'Under Kuplen', vi: null } }
+    const mapped = mapShowSummary(r, 'en')
+    expect(mapped.title).toBe('Under Kuplen')
+    expect(mapped.slug).toBe('under-kuplen-1')
   })
 
   it('falls back to original image and coerces string ratings', () => {
@@ -144,18 +151,23 @@ describe('mapCast / mapEpisode / mapShowDetail', () => {
   })
 
   it('coerces episode season/number decimals and defaults them to 0', () => {
-    const raw: RawEpisode = { id: 'episode-1', name: 'Pilot', season: '1' as unknown as number, number: null, summary: null }
+    const raw: RawEpisode = { id: 'episode-1', name: { en: 'Pilot', da: null, vi: null }, season: '1' as unknown as number, number: null, summary: null }
     expect(mapEpisode(raw, 'en')).toEqual({ id: 'episode-1', season: 1, number: 0, name: 'Pilot', summary: null })
+  })
+
+  it('falls back through locales for a localized episode name, same as show title', () => {
+    const raw: RawEpisode = { id: 'episode-1', name: { en: null, da: 'Piloten', vi: null }, season: 1, number: 1, summary: null }
+    expect(mapEpisode(raw, 'en').name).toBe('Piloten')
   })
 
   it('composes summary + cast + episodes into a detail', () => {
     const show: RawShow = {
-      id: 'show-5', name: 'X', genres: [], status: 'Running', premiered: '2020-01-01',
+      id: 'show-5', name: { en: 'X', da: null, vi: null }, genres: [], status: 'Running', premiered: '2020-01-01',
       network: { name: 'HBO' }, image: null, rating: null, summary: null
     }
     const detail = mapShowDetail(
       show,
-      [{ id: 'episode-1', name: 'E1', season: 1, number: 1, summary: null }],
+      [{ id: 'episode-1', name: { en: 'E1', da: null, vi: null }, season: 1, number: 1, summary: null }],
       [{ id: 'cast-1-1', person: { name: 'A', image: null }, character: { name: 'C', image: null } }],
       'en'
     )
@@ -165,5 +177,36 @@ describe('mapCast / mapEpisode / mapShowDetail', () => {
     expect(detail.episodes).toHaveLength(1)
     expect(detail.cast).toHaveLength(1)
     expect(detail.slug).toBe('x-5')
+  })
+})
+
+describe('mapComment', () => {
+  const raw: RawComment = {
+    id: 'c1',
+    createdAt: '2026-07-15T10:08:20.000Z',
+    memberName: '+84971026949',
+    showId: 1,
+    text: 'Test comment ne'
+  }
+
+  it('maps a raw comment to the domain shape', () => {
+    expect(mapComment(raw)).toEqual({
+      id: 'c1',
+      showId: 1,
+      author: '+84971026949',
+      body: 'Test comment ne',
+      createdAt: '2026-07-15T10:08:20.000Z'
+    })
+  })
+
+  it('coerces a decimal-string showId', () => {
+    expect(mapComment({ ...raw, showId: '5' as unknown as number }).showId).toBe(5)
+  })
+
+  it('defaults missing author/body/createdAt', () => {
+    const mapped = mapComment({ ...raw, memberName: null, text: null, createdAt: null })
+    expect(mapped.author).toBe('')
+    expect(mapped.body).toBe('')
+    expect(mapped.createdAt).toBe('')
   })
 })

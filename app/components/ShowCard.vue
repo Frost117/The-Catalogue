@@ -40,7 +40,11 @@ function onOpen(open: boolean) {
     <ShowCardTile :show="show" />
 
     <template #content>
-      <div class="flex w-72 max-w-[90vw] flex-col gap-2 p-4">
+      <div
+        role="region"
+        :aria-label="show.title"
+        class="flex w-72 max-w-[90vw] flex-col gap-2 p-4"
+      >
         <div class="flex items-start justify-between gap-2">
           <h3 class="font-semibold text-highlighted">
             {{ show.title }}

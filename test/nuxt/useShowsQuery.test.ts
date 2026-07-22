@@ -1,15 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { ref } from 'vue'
-import { buildWhere, buildOrderByLiteral, useShowsQuery, CATALOGUE_PAGE_SIZE, type CatalogueFilters } from '~/composables/useShowsQuery'
+import { buildWhere, useShowsQuery, CATALOGUE_PAGE_SIZE, type CatalogueFilters } from '~/composables/useShowsQuery'
 import type { ShowSummary } from '~/types/show'
 
 const baseFilters = (over: Partial<CatalogueFilters> = {}): CatalogueFilters => ({
   locale: 'en',
   search: '',
   genre: '',
-  sortBy: 'title',
-  sortDir: 'asc',
   ...over
 })
 
@@ -20,21 +18,17 @@ describe('buildWhere', () => {
     expect(buildWhere(baseFilters())).toEqual({ show: {} })
   })
 
-  it('adds name_contains and genres_some only when present', () => {
-    expect(buildWhere(baseFilters({ search: 'dome' }))).toEqual({ show: { name_contains: 'dome' } })
+  it('adds a locale-scoped name filter and genres_some only when present', () => {
+    expect(buildWhere(baseFilters({ search: 'dome' }))).toEqual({ show: { name: { en_contains: 'dome' } } })
     expect(buildWhere(baseFilters({ genre: 'Drama' }))).toEqual({ show: { genres_some: ['Drama'] } })
     expect(buildWhere(baseFilters({ search: 'dome', genre: 'Drama' }))).toEqual({
-      show: { name_contains: 'dome', genres_some: ['Drama'] }
+      show: { name: { en_contains: 'dome' }, genres_some: ['Drama'] }
     })
   })
-})
 
-describe('buildOrderByLiteral', () => {
-  it('maps each field/direction pair to the right orderBy literal', () => {
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'title', sortDir: 'asc' }))).toBe('[{ show: { name: ASC } }]')
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'title', sortDir: 'desc' }))).toBe('[{ show: { name: DESC } }]')
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'rating', sortDir: 'desc' }))).toBe('[{ show: { rating: { average: DESC } } }]')
-    expect(buildOrderByLiteral(baseFilters({ sortBy: 'release', sortDir: 'asc' }))).toBe('[{ show: { premiered: ASC } }]')
+  it('matches the search filter field to the current locale', () => {
+    expect(buildWhere(baseFilters({ search: 'dome', locale: 'da' }))).toEqual({ show: { name: { da_contains: 'dome' } } })
+    expect(buildWhere(baseFilters({ search: 'dome', locale: 'vi' }))).toEqual({ show: { name: { vi_contains: 'dome' } } })
   })
 })
 
@@ -62,7 +56,7 @@ const summary = (id: string): ShowSummary => ({ id, slug: id, title: id, genres:
 
 const page = (ids: string[], endCursor: string | null, hasNextPage: boolean) => ({
   tvshow_collection: {
-    items: ids.map(id => ({ id, name: id, genres: [], status: null, premiered: null, network: null, image: null, rating: null, summary: null })),
+    items: ids.map(id => ({ id, name: { en: id, da: null, vi: null }, genres: [], status: null, premiered: null, network: null, image: null, rating: null, summary: null })),
     pageInfo: { endCursor, hasNextPage }
   }
 })

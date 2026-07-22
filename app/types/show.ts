@@ -33,9 +33,6 @@ export interface ShowSummary {
   image?: string | null
   rating?: number | null
   genres: string[]
-  // Number of comments on this show, shown in the catalogue card footer.
-  // Populated from Compose once the comments read lands (null until then).
-  commentCount?: number | null
 }
 
 export interface Comment {

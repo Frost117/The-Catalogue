@@ -22,17 +22,7 @@
     "noResults": "No shows match your search.",
     "clearFilters": "Clear filters",
     "loadMore": "Load more",
-    "seasonsCount": "{count} season | {count} seasons",
-    "sortLabel": "Sort by",
-    "sortBy": {
-      "title": "Title",
-      "rating": "Rating",
-      "release": "Release date"
-    },
-    "sortDirection": {
-      "ascLabel": "Sort ascending",
-      "descLabel": "Sort descending"
-    }
+    "seasonsCount": "{count} season | {count} seasons"
   },
   "show": {
     "rating": "Rating",
@@ -85,6 +75,7 @@
     "posting": "Posting…",
     "postError": "Couldn’t post your comment. Please try again.",
     "count": "{count} comment | {count} comments",
-    "jump": "Jump to comments"
+    "jump": "Jump to comments",
+    "loadMore": "Load more"
   }
 }

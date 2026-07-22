@@ -26,7 +26,10 @@ const callingCodeItems = CALLING_CODES.map(c => ({
 
 <template>
   <div class="flex flex-col gap-4 p-4">
-    <h2 class="text-lg font-semibold text-highlighted">
+    <h2
+      id="login-form-title"
+      class="text-lg font-semibold text-highlighted"
+    >
       {{ t('auth.login') }}
     </h2>
 
