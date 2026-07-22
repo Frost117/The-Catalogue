@@ -103,5 +103,32 @@ const callingCodeItems = CALLING_CODES.map(c => ({
         :label="t('auth.verify')"
       />
     </form>
+
+    <!-- Required reCAPTCHA attribution: shown because the floating badge is
+         hidden via CSS (see main.css), which Google permits only with this
+         disclosure in its place. -->
+    <i18n-t
+      keypath="auth.recaptchaNotice"
+      tag="p"
+      class="text-xs text-muted"
+      scope="global"
+    >
+      <template #privacy>
+        <a
+          href="https://policies.google.com/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline"
+        >{{ t('auth.recaptchaPrivacy') }}</a>
+      </template>
+      <template #terms>
+        <a
+          href="https://policies.google.com/terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline"
+        >{{ t('auth.recaptchaTerms') }}</a>
+      </template>
+    </i18n-t>
   </div>
 </template>

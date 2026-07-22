@@ -16,3 +16,11 @@
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
 }
+
+/* Hide the floating reCAPTCHA v2 Invisible badge. Google permits this only when
+ * the required attribution is shown instead — see the reCAPTCHA notice in
+ * LoginForm.vue. Keep it in the a11y tree (visibility, not display:none) so the
+ * challenge widget still works. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

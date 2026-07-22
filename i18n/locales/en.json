@@ -64,7 +64,10 @@
     "requestFailed": "Something went wrong. Please try again.",
     "loggedIn": "You’re logged in.",
     "loggedOut": "You’ve been logged out.",
-    "logoutFailed": "Couldn’t log you out. Please try again."
+    "logoutFailed": "Couldn’t log you out. Please try again.",
+    "recaptchaNotice": "This site is protected by reCAPTCHA and the Google {privacy} and {terms} apply.",
+    "recaptchaPrivacy": "Privacy Policy",
+    "recaptchaTerms": "Terms of Service"
   },
   "comments": {
     "title": "Comments",

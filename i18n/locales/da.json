@@ -64,7 +64,10 @@
     "requestFailed": "Noget gik galt. Prøv venligst igen.",
     "loggedIn": "Du er nu logget ind.",
     "loggedOut": "Du er nu logget ud.",
-    "logoutFailed": "Kunne ikke logge dig ud. Prøv venligst igen."
+    "logoutFailed": "Kunne ikke logge dig ud. Prøv venligst igen.",
+    "recaptchaNotice": "Dette site er beskyttet af reCAPTCHA, og Googles {privacy} og {terms} gælder.",
+    "recaptchaPrivacy": "privatlivspolitik",
+    "recaptchaTerms": "servicevilkår"
   },
   "comments": {
     "title": "Kommentarer",

@@ -64,7 +64,10 @@
     "requestFailed": "Đã xảy ra lỗi. Vui lòng thử lại.",
     "loggedIn": "Bạn đã đăng nhập.",
     "loggedOut": "Bạn đã đăng xuất.",
-    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại."
+    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại.",
+    "recaptchaNotice": "Trang web này được bảo vệ bằng reCAPTCHA và {privacy} cùng {terms} của Google được áp dụng.",
+    "recaptchaPrivacy": "Chính sách quyền riêng tư",
+    "recaptchaTerms": "Điều khoản dịch vụ"
   },
   "comments": {
     "title": "Bình luận",
