@@ -45,7 +45,12 @@ export default defineNuxtConfig({
     // backend doesn't rename, so it's the framework default. The comments proxy
     // (server/api/comments.post.ts) rejects posts that arrive without it.
     memberSessionCookie: process.env.MEMBER_SESSION_COOKIE || '.AspNetCore.Identity.Application',
-    public: {}
+    public: {
+      // reCAPTCHA v2 Invisible site key — public by design (used in the browser
+      // to mint the X-Recaptcha-Token the member-login backend requires on the
+      // OTP endpoints). See app/composables/useRecaptcha.ts.
+      recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || ''
+    }
   },
 
   routeRules: {

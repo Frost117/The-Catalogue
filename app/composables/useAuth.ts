@@ -23,12 +23,25 @@ export function useAuth() {
     return user.value
   }
 
+  const { execute: executeRecaptcha } = useRecaptcha()
+
   async function requestOtp(phone: number, callingCode: number) {
-    await $fetch('/api/auth/request-otp', { method: 'POST', body: { phone, callingCode } })
+    // The backend rejects OTP requests without a valid reCAPTCHA token (403).
+    const token = await executeRecaptcha()
+    await $fetch('/api/auth/request-otp', {
+      method: 'POST',
+      headers: { 'X-Recaptcha-Token': token },
+      body: { phone, callingCode }
+    })
   }
 
   async function verifyOtp(phone: number, callingCode: number, code: string) {
-    await $fetch('/api/auth/verify-otp', { method: 'POST', body: { phone, callingCode, code } })
+    const token = await executeRecaptcha()
+    await $fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'X-Recaptcha-Token': token },
+      body: { phone, callingCode, code }
+    })
     // The backend has set the session cookie; hydrate our state from profile.
     return fetchProfile()
   }
