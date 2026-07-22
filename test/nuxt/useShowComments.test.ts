@@ -29,6 +29,18 @@ registerEndpoint('/api/comments', {
 })
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key, locale: ref('en') }))
 
+// submitComment() bails unless loggedIn (see the guard in useShowComments), and
+// post() reads user.value.username for the optimistic entry, so a logged-in
+// useAuth is required for any post-path assertion.
+mockNuxtImport('useAuth', () => () => ({
+  user: ref({ id: 'u1', key: 'u1', username: '+4520123456' }),
+  loggedIn: ref(true),
+  fetchProfile: vi.fn(),
+  requestOtp: vi.fn(),
+  verifyOtp: vi.fn(),
+  logout: vi.fn()
+}))
+
 const raw = (over: Partial<RawComment> = {}): RawComment => ({
   id: 'c1',
   createdAt: '2026-07-15T10:08:20.000Z',
