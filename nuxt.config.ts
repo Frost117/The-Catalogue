@@ -64,7 +64,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-01-15',
 
   nitro: {
-    preset: 'cloudflare_module'
+    // Cloudflare Pages target: emits dist/ with _worker.js + _routes.json, which
+    // wrangler.toml's pages_build_output_dir points at. The app deploys via
+    // Cloudflare Pages' Git integration (build on push); see docs/deployment.md.
+    preset: 'cloudflare_pages'
   },
 
   eslint: {
