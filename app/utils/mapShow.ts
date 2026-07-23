@@ -15,7 +15,7 @@ function toNum(value: number | string | null | undefined): number | null {
 // requested locale has no text yet, fall through this order. `lang` reports
 // which language actually served the text, so the detail page can surface a
 // "not translated" hint.
-const LOCALE_FALLBACK = ['en', 'da', 'vi'] as const
+export const LOCALE_FALLBACK = ['en', 'da', 'vi'] as const
 
 export function resolveLocalized(
   text: RawLocalizedText | null | undefined,
