@@ -61,14 +61,26 @@ async function fetchPage(filters: CatalogueFilters, after: string | null): Promi
 }
 
 // Paginated catalogue with a "load more" affordance. The first page is fetched
-// via useAsyncData (so it renders during SSR and re-runs when the reactive
+// via useAsyncData (so it renders during SSR and re-fetches when the reactive
 // search/genre/locale state changes); subsequent pages are appended on
 // the client.
 export function useShowsQuery(filters: () => CatalogueFilters) {
+  // The key encodes every filter so each distinct filter set is its own cache
+  // entry, and useAsyncData re-fetches whenever the key changes. A *static* key
+  // was subtly broken: the i18n `prefix` strategy remounts this page on a locale
+  // switch, but useAsyncData dedupes by key, so the remounted page reused the
+  // FIRST instance's handler closure — which reads the now-dead component's
+  // filter refs. Refetching then re-ran that stale closure and ignored the new
+  // search/genre/locale, so results froze until a full page reload. Keying by
+  // the filters sidesteps this: a changed filter set is always a fresh entry,
+  // fetched by the current instance's handler.
+  const key = computed(() => {
+    const f = filters()
+    return `catalogue:${f.locale}:${f.genre}:${f.search}`
+  })
   const { data, status, error, refresh } = useAsyncData(
-    'catalogue',
-    () => fetchPage(filters(), null),
-    { watch: [filters] }
+    key,
+    () => fetchPage(filters(), null)
   )
 
   // State for pages loaded after the first via "load more". `appended` is null
