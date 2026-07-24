@@ -9,8 +9,13 @@ mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key, locale: ref('e
 mockNuxtImport('useRoute', () => () => ({
   query: {}, path: '/', fullPath: '/', params: {}, hash: '', name: 'index', matched: [], meta: {}
 }))
+// currentRoute is required: @nuxtjs/i18n's route-locale-detect plugin runs on
+// app boot (strategy: 'prefix' + detectBrowserLanguage.redirectOn: 'root' in
+// nuxt.config.ts) and reads router.currentRoute.value.meta — omitting it
+// throws "Cannot read properties of undefined (reading 'value')" during init.
 mockNuxtImport('useRouter', () => () => ({
-  replace: vi.fn(), push: vi.fn(), afterEach: vi.fn(), beforeEach: vi.fn(), beforeResolve: vi.fn(), onError: vi.fn()
+  replace: vi.fn(), push: vi.fn(), afterEach: vi.fn(), beforeEach: vi.fn(), beforeResolve: vi.fn(), onError: vi.fn(),
+  currentRoute: ref({ path: '/', fullPath: '/', params: {}, hash: '', name: 'index', matched: [], meta: {} })
 }))
 mockNuxtImport('useSeoMeta', () => vi.fn())
 

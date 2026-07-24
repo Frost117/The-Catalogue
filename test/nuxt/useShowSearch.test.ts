@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { nextTick } from 'vue'
+import { nextTick, ref } from 'vue'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { useShowSearch, firstQuery } from '~/composables/useShowSearch'
 
@@ -21,13 +21,18 @@ mockNuxtImport('useRoute', () => () => ({
 }))
 // The @nuxt/test-utils runtime setup itself calls useRouter().afterEach(), so the
 // stub must carry the guard hooks as no-ops; we only assert on `replace`.
+// currentRoute is required too: @nuxtjs/i18n's route-locale-detect plugin runs
+// on app boot (strategy: 'prefix' + detectBrowserLanguage.redirectOn: 'root' in
+// nuxt.config.ts) and reads router.currentRoute.value.meta — omitting it throws
+// "Cannot read properties of undefined (reading 'value')" during app init.
 mockNuxtImport('useRouter', () => () => ({
   replace: mocks.routerReplace,
   push: vi.fn(),
   afterEach: vi.fn(),
   beforeEach: vi.fn(),
   beforeResolve: vi.fn(),
-  onError: vi.fn()
+  onError: vi.fn(),
+  currentRoute: ref({ path: '/', fullPath: '/', params: {}, hash: '', name: 'index', matched: [], meta: {} })
 }))
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 
