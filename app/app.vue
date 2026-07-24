@@ -1,8 +1,15 @@
 <script setup lang="ts">
 const { t } = useI18n()
 const localePath = useLocalePath()
-const { loggedIn, logout } = useAuth()
+const { loggedIn } = useAuth()
+const { loggingOut, logout } = useAuthActions()
 const authModalOpen = ref(false)
+
+// Wrapped so the click handler returns void (an inline `authModalOpen = true`
+// evaluates to a boolean, which strict template typing rejects).
+function openAuthModal() {
+  authModalOpen.value = true
+}
 
 // Locale-aware <html lang>, hreflang alternates and canonical for SEO.
 const head = useLocaleHead()
@@ -50,12 +57,13 @@ useSeoMeta({
           v-if="!loggedIn"
           variant="ghost"
           :label="t('auth.login')"
-          @click="authModalOpen = true"
+          @click="openAuthModal"
         />
         <UButton
           v-else
           variant="ghost"
           :label="t('auth.logout')"
+          :loading="loggingOut"
           @click="logout()"
         />
       </template>

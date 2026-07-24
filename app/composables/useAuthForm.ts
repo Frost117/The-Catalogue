@@ -5,6 +5,7 @@ import { DEFAULT_CALLING_CODE } from '~/utils/callingCodes'
 // there is no separate signup mode.
 export function useAuthForm(onSuccess: () => void) {
   const { t } = useI18n()
+  const toast = useToast()
   const { requestOtp, verifyOtp } = useAuth()
   const { execute } = useRecaptcha()
 
@@ -35,6 +36,9 @@ export function useAuthForm(onSuccess: () => void) {
     errorMessage.value = null
     try {
       await verifyOtp(Number(phone.value), callingCode.value, code.value)
+      // The modal closes on success, so confirm the login with a toast — the
+      // header button swap alone is too subtle to notice.
+      toast.add({ title: t('auth.loggedIn'), color: 'success', icon: 'i-lucide-check' })
       onSuccess()
     } catch (err) {
       const statusCode = (err as { statusCode?: number })?.statusCode

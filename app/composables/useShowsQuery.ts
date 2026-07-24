@@ -1,14 +1,15 @@
 import showsQuery from '~/graphql/shows.gql?raw'
 import { gqlRequest } from '~/utils/gqlRequest'
-import { mapShowSummary } from '~/utils/mapShow'
+import { mapShowSummary, LOCALE_FALLBACK } from '~/utils/mapShow'
 import type { ShowSummary } from '~/types/show'
 import type { RawNodeConnection, RawShow } from '~/types/compose'
 
 export const CATALOGUE_PAGE_SIZE = 24
 
 export interface CatalogueFilters {
-  // Selects which `name`/`summary` translation the mapper reads, and (via
-  // buildWhere) which localized `name` field the search filter matches against.
+  // Selects which `name`/`summary` translation the mapper reads. NOT used by
+  // buildWhere: search matches across every localized name field (see below),
+  // independent of the displayed locale.
   locale: string
   search: string
   genre: string
@@ -22,14 +23,20 @@ interface CataloguePage {
 
 // Translate filters into the Compose `where` input. Optional filters are only
 // included when set, so we never send `name: { en_contains: null }` or
-// `genres_some: [null]`. `name` is localized ({ en, da, vi }), so search
-// matches against whichever language field the catalogue is currently
-// displaying (filters.locale) — matching the mapper's display text keeps
-// "what you see is what you can search for".
+// `genres_some: [null]`.
+//
+// `name` is localized ({ en, da, vi }). Search matches against ALL localized
+// name fields (an OR), not just the displayed locale's, so results mirror the
+// mapper's display fallback (resolveLocalized falls back en->da->vi). Matching
+// only `${locale}_contains` broke search in non-default languages: a show whose
+// `name.da` is untranslated still displays its English title via fallback, but a
+// `da_contains` filter never matched it — e.g. searching "dexter" in Danish
+// returned nothing. `_contains` is case-insensitive. A sibling `genres_some` is
+// ANDed with the name OR, so genre + search still narrows correctly.
 export function buildWhere(filters: CatalogueFilters) {
   const show: Record<string, unknown> = {}
   if (filters.search) {
-    show.name = { [`${filters.locale}_contains`]: filters.search }
+    show.OR = LOCALE_FALLBACK.map(lang => ({ name: { [`${lang}_contains`]: filters.search } }))
   }
   if (filters.genre) {
     show.genres_some = [filters.genre]
@@ -54,14 +61,26 @@ async function fetchPage(filters: CatalogueFilters, after: string | null): Promi
 }
 
 // Paginated catalogue with a "load more" affordance. The first page is fetched
-// via useAsyncData (so it renders during SSR and re-runs when the reactive
+// via useAsyncData (so it renders during SSR and re-fetches when the reactive
 // search/genre/locale state changes); subsequent pages are appended on
 // the client.
 export function useShowsQuery(filters: () => CatalogueFilters) {
+  // The key encodes every filter so each distinct filter set is its own cache
+  // entry, and useAsyncData re-fetches whenever the key changes. A *static* key
+  // was subtly broken: the i18n `prefix` strategy remounts this page on a locale
+  // switch, but useAsyncData dedupes by key, so the remounted page reused the
+  // FIRST instance's handler closure — which reads the now-dead component's
+  // filter refs. Refetching then re-ran that stale closure and ignored the new
+  // search/genre/locale, so results froze until a full page reload. Keying by
+  // the filters sidesteps this: a changed filter set is always a fresh entry,
+  // fetched by the current instance's handler.
+  const key = computed(() => {
+    const f = filters()
+    return `catalogue:${f.locale}:${f.genre}:${f.search}`
+  })
   const { data, status, error, refresh } = useAsyncData(
-    'catalogue',
-    () => fetchPage(filters(), null),
-    { watch: [filters] }
+    key,
+    () => fetchPage(filters(), null)
   )
 
   // State for pages loaded after the first via "load more". `appended` is null

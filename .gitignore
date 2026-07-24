@@ -31,5 +31,8 @@ logs
 .env.*
 !.env.example
 
+# wrangler pages dev runtime env (contains secrets)
+.dev.vars
+
 # API-client collections (contain secrets)
 *.postman_collection.json

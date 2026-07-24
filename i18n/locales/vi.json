@@ -61,7 +61,13 @@
     "verify": "Xác nhận",
     "invalidPhone": "Vui lòng nhập số điện thoại hợp lệ.",
     "invalidCode": "Mã không hợp lệ hoặc đã hết hạn.",
-    "requestFailed": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "requestFailed": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "loggedIn": "Bạn đã đăng nhập.",
+    "loggedOut": "Bạn đã đăng xuất.",
+    "logoutFailed": "Không thể đăng xuất. Vui lòng thử lại.",
+    "recaptchaNotice": "Trang web này được bảo vệ bằng reCAPTCHA và {privacy} cùng {terms} của Google được áp dụng.",
+    "recaptchaPrivacy": "Chính sách quyền riêng tư",
+    "recaptchaTerms": "Điều khoản dịch vụ"
   },
   "comments": {
     "title": "Bình luận",

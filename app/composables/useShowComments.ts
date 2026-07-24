@@ -126,7 +126,11 @@ export function useShowComments(showId: () => number | null) {
 
   async function submitComment() {
     const text = commentBody.value.trim()
-    if (!text || posting.value) {
+    // Defense in depth against posting while logged out. The write is authorized
+    // upstream by the member session cookie (see server/api/comments.post.ts),
+    // and the view only renders the form when logged in — but this guarantees no
+    // submit path fires a guaranteed-401 /api/comments request without a session.
+    if (!text || posting.value || !loggedIn.value) {
       return
     }
     posting.value = true

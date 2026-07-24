@@ -40,11 +40,15 @@ export default defineNuxtConfig({
     // Umbraco member-login backend. All /api/auth/* requests are proxied here
     // (server/api/auth/[...].ts); it owns the OTP flow and the session cookie.
     memberLoginHost: process.env.MEMBER_LOGIN_HOST || '',
+    // Name of the member session cookie the backend sets on login. Umbraco
+    // members use ASP.NET Core Identity's application scheme, whose cookie the
+    // backend doesn't rename, so it's the framework default. The comments proxy
+    // (server/api/comments.post.ts) rejects posts that arrive without it.
+    memberSessionCookie: process.env.MEMBER_SESSION_COOKIE || '.AspNetCore.Identity.Application',
     public: {
-      // reCAPTCHA v3 site key — unlike every other credential above, this one
-      // is meant to be public: it's loaded client-side by useRecaptcha.ts to
-      // execute the widget. The backend holds the matching secret key and
-      // verifies the token server-side; this app never sees that secret.
+      // reCAPTCHA v2 Invisible site key — public by design (used in the browser
+      // to mint the X-Recaptcha-Token the member-login backend requires on the
+      // OTP endpoints). See app/composables/useRecaptcha.ts.
       recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || ''
     }
   },
@@ -60,7 +64,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-01-15',
 
   nitro: {
-    preset: 'cloudflare_module'
+    // Cloudflare Pages target: emits dist/ with _worker.js + _routes.json, which
+    // wrangler.toml's pages_build_output_dir points at. The app deploys via
+    // Cloudflare Pages' Git integration (build on push); see docs/deployment.md.
+    preset: 'cloudflare_pages'
   },
 
   eslint: {
