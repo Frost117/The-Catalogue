@@ -11,7 +11,7 @@ const ALL_GENRES = '__all__'
 // Owns the catalogue page's search/genre filter state, debounces typed
 // search input into a committed term, and keeps all of it in sync with the
 // URL so results are shareable + SSR-able.
-export function useCatalogueFilters(genres: () => string[] | null | undefined) {
+export function useShowSearch(genres: () => string[] | null | undefined) {
   const { t } = useI18n()
   const route = useRoute()
   const router = useRouter()

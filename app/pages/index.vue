@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useShowsQuery } from '~/composables/useShowsQuery'
 import { useGenresQuery } from '~/composables/useGenresQuery'
-import { useCatalogueFilters } from '~/composables/useCatalogueFilters'
+import { useShowSearch } from '~/composables/useShowSearch'
 
 const { t, locale } = useI18n()
 
@@ -14,7 +14,7 @@ const {
   genreItems,
   hasFilters,
   clearFilters
-} = useCatalogueFilters(() => genres.value)
+} = useShowSearch(() => genres.value)
 
 const {
   items: shows,
