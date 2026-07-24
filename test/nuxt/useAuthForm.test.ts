@@ -7,13 +7,20 @@ const auth = vi.hoisted(() => ({
   requestOtp: vi.fn(),
   verifyOtp: vi.fn()
 }))
+const toast = vi.hoisted(() => ({ add: vi.fn() }))
 
 mockNuxtImport('useI18n', () => () => ({ t: (key: string) => key }))
 mockNuxtImport('useAuth', () => () => ({ ...auth, logout: vi.fn(), user: null, loggedIn: false }))
+// useAuthForm() is called directly here, not via mountSuspended, so there's no
+// active component instance for the real useToast()'s inject() call to find —
+// it still works (a default keeps it functional) but warns every time. Same
+// mock pattern as useAuthActions.test.ts avoids that.
+mockNuxtImport('useToast', () => () => toast)
 
 beforeEach(() => {
   auth.requestOtp.mockReset()
   auth.verifyOtp.mockReset()
+  toast.add.mockReset()
 })
 
 describe('useAuthForm — phone step', () => {
