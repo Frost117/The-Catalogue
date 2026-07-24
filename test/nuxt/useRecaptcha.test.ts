@@ -26,12 +26,23 @@ vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
   }
   return realCreateElement(tagName)
 })
+// Scoped to our fake nodes only — Vue's own Suspense-boundary mount also
+// appends real nodes to head/body during the same environment's bootstrap,
+// and swallowing those (rather than falling through to the real
+// implementation) breaks that unrelated mount downstream.
+const realHeadAppendChild = document.head.appendChild.bind(document.head)
 vi.spyOn(document.head, 'appendChild').mockImplementation((node) => {
-  // Simulate the real Google script loading and defining window.grecaptcha.
-  scriptEl.onload?.()
-  return node
+  if ((node as unknown) === scriptEl) {
+    // Simulate the real Google script loading and defining window.grecaptcha.
+    scriptEl.onload?.()
+    return node
+  }
+  return realHeadAppendChild(node)
 })
-vi.spyOn(document.body, 'appendChild').mockImplementation(node => node)
+const realBodyAppendChild = document.body.appendChild.bind(document.body)
+vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+  return node === container ? node : realBodyAppendChild(node)
+})
 
 let renderParams: Record<string, unknown> = {}
 const grecaptchaMock = {
