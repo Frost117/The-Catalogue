@@ -7,7 +7,6 @@ export function useAuthForm(onSuccess: () => void) {
   const { t } = useI18n()
   const toast = useToast()
   const { requestOtp, verifyOtp } = useAuth()
-  const { execute } = useRecaptcha()
 
   const step = ref<'phone' | 'code'>('phone')
   const phone = ref('')
@@ -20,8 +19,7 @@ export function useAuthForm(onSuccess: () => void) {
     loading.value = true
     errorMessage.value = null
     try {
-      const recaptchaToken = await execute('login')
-      await requestOtp(Number(phone.value), callingCode.value, recaptchaToken)
+      await requestOtp(Number(phone.value), callingCode.value)
       step.value = 'code'
     } catch (err) {
       const statusCode = (err as { statusCode?: number })?.statusCode
