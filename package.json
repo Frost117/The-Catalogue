@@ -19,7 +19,7 @@
     "@iconify-json/simple-icons": "^1.2.86",
     "@nuxt/ui": "^4.9.0",
     "@nuxtjs/i18n": "^10.4.0",
-    "nuxt": "^4.4.8",
+    "nuxt": "^4.5.2",
     "nuxt-graphql-client": "^0.2.46",
     "tailwindcss": "^4.3.1"
   },
