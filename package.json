@@ -26,14 +26,14 @@
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^5.0.5",
     "@vue/test-utils": "^2.4.11",
     "axe-core": "^4.12.1",
     "eslint": "^10.5.0",
     "eslint-plugin-vuejs-accessibility": "^2.5.0",
     "happy-dom": "^20.10.6",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10",
+    "vitest": "^5.0.5",
     "vue-tsc": "^3.3.5",
     "wrangler": "^4.107.0"
   },
